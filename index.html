@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6edf8" />
+    <meta name="description" content="WVEERIE — Aurora Maximova's creative and technical portfolio." />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="WVEERIE — Aurora Maximova" />
+    <meta property="og:description" content="Choose a side of Aurora Maximova's world: creative modeling archive or technical IT portfolio." />
+    <meta property="og:url" content="https://wveerie.github.io" />
+    <meta property="og:image" content="https://wveerie.github.io/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="WVEERIE — Aurora Maximova" />
+    <meta name="twitter:description" content="Choose a side of Aurora Maximova's world: creative modeling archive or technical IT portfolio." />
+    <meta name="twitter:image" content="https://wveerie.github.io/og.png" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23ee65ad'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-size='38' fill='white'%3E%E2%99%A1%3C/text%3E%3C/svg%3E" />
+    <title>WVEERIE — Aurora Maximova</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Nunito:wght@400;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="content/uploads.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#view" data-skip-content>Skip to content</a>
+
+    <section class="ronia-intro" id="ronia-intro" data-session="prologue" aria-label="Ronia pixel runner introduction">
+      <div class="intro-city" aria-hidden="true"></div>
+      <div class="intro-atmosphere" aria-hidden="true"></div>
+      <div class="intro-clouds" aria-hidden="true"></div>
+      <header class="intro-hud">
+        <div class="intro-life">
+          <span id="intro-hp-hearts" aria-label="Three health points">♥ ♥ ♥</span>
+          <b>HP <em id="intro-hp-copy">3/3</em></b>
+          <i><em id="intro-hp-fill"></em></i>
+        </div>
+        <div class="intro-score">
+          <span>SCORE <b id="intro-score">00000</b></span>
+          <span>BEST <b id="intro-best">00000</b></span>
+        </div>
+      </header>
+      <div class="intro-title">
+        <span>WELCOME TO</span>
+        <strong>RONIA</strong>
+        <b>WVEERIE DIGITAL ARCHIVE</b>
+      </div>
+      <div class="intro-collectibles" aria-hidden="true">
+        <img class="collectible collectible-heart" src="assets/game/sprites/props/heart.png" alt="" decoding="async" />
+        <img class="collectible collectible-sparkle" src="assets/game/sprites/props/sparkle.png" alt="" decoding="async" />
+        <img class="collectible collectible-butterfly" src="assets/game/sprites/props/butterfly.png" alt="" decoding="async" />
+        <img class="collectible collectible-bow" src="assets/game/sprites/props/bow.png" alt="" decoding="async" />
+      </div>
+      <div class="intro-stage" aria-hidden="true">
+        <img class="intro-sprite intro-ronia" id="intro-ronia" src="assets/game/v3/sprites/ronia/run/frame-01.png" alt="" decoding="async" />
+        <img class="intro-sprite intro-ronia intro-sprite-ghost" data-ghost-for="intro-ronia" src="assets/game/v3/sprites/ronia/run/frame-01.png" alt="" decoding="async" />
+        <img class="intro-sprite intro-cats" id="intro-cats" src="assets/game/v3/sprites/cats/run/frame-01.png" alt="" decoding="async" />
+        <img class="intro-sprite intro-cats intro-sprite-ghost" data-ghost-for="intro-cats" src="assets/game/v3/sprites/cats/run/frame-01.png" alt="" decoding="async" />
+        <img class="intro-sprite intro-pet-scene" id="intro-pet-scene" src="assets/game/v3/sprites/pet-scene/frame-01.png" alt="" decoding="async" hidden />
+        <img class="intro-sprite intro-pet-scene intro-sprite-ghost" data-ghost-for="intro-pet-scene" src="assets/game/v3/sprites/pet-scene/frame-01.png" alt="" decoding="async" />
+        <div class="intro-world" id="intro-world"></div>
+      </div>
+      <button class="intro-enter" type="button" data-intro-enter>
+        <span>RONIA WILL LEAD THE WAY ♡</span>
+        <strong>CLICK ANYWHERE TO ENTER</strong>
+      </button>
+      <div class="intro-controls" aria-label="Ronia game controls">
+        <button type="button" data-run-control="stop" aria-label="Stop running">← <span>STOP</span></button>
+        <button type="button" data-run-control="run" aria-label="Hold to run">→ <span>RUN</span></button>
+        <button type="button" data-run-control="jump" aria-label="Jump">↑ <span>JUMP</span></button>
+      </div>
+      <button class="intro-skip" type="button" data-intro-skip>SKIP &gt;&gt;</button>
+      <button class="intro-music" type="button" data-intro-music aria-pressed="false">♫ MUSIC SOON</button>
+      <p class="intro-hint" id="intro-hint">RUNNING TO THE ARCHIVE… CLICK ANYWHERE TO ENTER ♡</p>
+      <section class="intro-gameover" id="intro-gameover" aria-labelledby="intro-gameover-title" hidden>
+        <span>♡ SAVE POINT MISSED ♡</span>
+        <h2 id="intro-gameover-title">GAME OVER</h2>
+        <p>SCORE <strong id="intro-final-score">00000</strong></p>
+        <div>
+          <button type="button" data-intro-retry>TRY AGAIN</button>
+          <button type="button" data-intro-exit>ENTER ARCHIVE</button>
+        </div>
+      </section>
+      <div class="intro-pixel-wipe" id="intro-pixel-wipe" aria-hidden="true"></div>
+      <audio id="ronia-music" loop preload="metadata" data-src=""></audio>
+    </section>
+
+    <section class="side-select" id="side-select" aria-labelledby="side-select-title" aria-hidden="true" tabindex="-1" hidden>
+      <div class="side-select-stars" aria-hidden="true"><span>✦</span><span>♡</span><span>◇</span><span>⋆</span></div>
+      <header class="side-select-head">
+        <p>RONIA // ROUTE SELECT</p>
+        <h1 id="side-select-title">CHOOSE YOUR PATH</h1>
+        <span>One player · two sides</span>
+      </header>
+      <div class="side-options">
+        <button class="side-option side-option-tech" type="button" data-choose-side="tech" aria-label="For tech teams and engineers: open Aurora's technical portfolio">
+          <span class="side-number">LEFT · LOGIC</span>
+          <strong>TECH</strong>
+          <small>People, systems &amp; code</small>
+          <b>SELECT <i>→</i></b>
+        </button>
+        <div class="side-brain-stage" aria-hidden="true">
+          <span class="brain-side-glow brain-side-glow-left"></span>
+          <span class="brain-side-glow brain-side-glow-right"></span>
+          <img class="side-brain-art" src="assets/game/v3/ui/ronia-mind-choice-v3.png" alt="" loading="lazy" decoding="async" fetchpriority="low" />
+        </div>
+        <button class="side-option side-option-creative" type="button" data-choose-side="creative" aria-label="For model agencies and creative teams: open Aurora's modeling portfolio">
+          <span class="side-number">RIGHT · IMAGINATION</span>
+          <strong>CREATIVE</strong>
+          <small>Modeling, stories &amp; art</small>
+          <b>SELECT <i>→</i></b>
+        </button>
+      </div>
+      <p class="side-select-hint">← MOVE · ENTER TO SELECT →</p>
+    </section>
+
+    <section class="side-transition" id="side-transition" aria-hidden="true" hidden>
+      <div class="side-transition-core" role="status" aria-live="polite">
+        <span id="side-transition-kicker">HEMISPHERE LINK</span>
+        <div class="side-transition-mark" aria-hidden="true"><i>L</i><b>◆</b><i>R</i></div>
+        <strong id="side-transition-title">SYNCING...</strong>
+        <small>ROUTE CHANGE IN PROGRESS</small>
+      </div>
+    </section>
+
+    <div class="app-shell">
+      <div class="ambient ambient-a" aria-hidden="true"></div>
+      <div class="ambient ambient-b" aria-hidden="true"></div>
+      <div class="floating-decor" aria-hidden="true">
+        <span>✦</span><span>♡</span><span>◇</span><span>⋆</span><span>୨୧</span><span>✧</span>
+      </div>
+
+      <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+        <div class="window-titlebar">
+          <button class="brand-link" type="button" data-route="/home" aria-label="Return home">wveerie.exe</button>
+          <span class="window-controls" aria-hidden="true">● ● ●</span>
+        </div>
+
+        <div class="profile-chip">
+          <img class="creative-profile-photo" src="assets/photos/snaps/snap1.jpg" alt="Aurora Maximova natural model headshot" loading="lazy" decoding="async" />
+          <span class="tech-profile-avatar" aria-hidden="true" hidden><img src="assets/game/v3/ui/ronia-tech-avatar-v2.png" alt="" loading="lazy" decoding="async" fetchpriority="low" /></span>
+          <strong id="profile-chip-name">AURORA MAXIMOVA</strong>
+          <span id="profile-chip-role">MODEL / CREATIVE</span>
+        </div>
+
+        <nav class="main-nav" id="main-nav">
+          <button type="button" data-route="/home"><span>✦</span>HOME</button>
+          <button type="button" data-route="/portfolio"><span>◎</span>PORTFOLIO</button>
+          <button type="button" data-route="/artwork"><span>✎</span>ARTWORK</button>
+          <button type="button" data-route="/snaps"><span>◷</span>SNAPS</button>
+          <button type="button" data-route="/projects"><span>⊞</span>PROJECTS</button>
+          <button type="button" data-panel="about"><span>♥</span>ABOUT ME</button>
+          <button type="button" data-panel="contact"><span>✉</span>CONTACT</button>
+        </nav>
+
+        <div class="sidebar-status">
+          <button class="gyaru-chip portfolio-switch" type="button" data-side-toggle aria-label="Switch to the technical portfolio"><span>⌘ TECH PORTFOLIO</span><b>L</b></button>
+          <div class="level-line"><span id="player-level">LVL 01</span><span id="player-xp">0 / 100</span></div>
+          <div class="xp-bar"><i id="xp-fill"></i></div>
+          <button class="quest-button" type="button" data-panel="quests"><span>QUEST LOG</span><b id="quest-count">0/5</b></button>
+          <p><i></i> STATUS: ONLINE</p>
+          <small>Q: QUESTS · M: MENU</small>
+        </div>
+      </aside>
+
+      <header class="mobile-bar">
+        <button class="mobile-brand" type="button" data-route="/home">WVEERIE <span id="mobile-level">LVL 01</span></button>
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-controls="sidebar" aria-expanded="false">MENU +</button>
+      </header>
+
+      <main class="view" id="view" tabindex="-1" aria-live="polite"></main>
+    </div>
+
+    <div class="panel-backdrop" id="panel-backdrop" hidden></div>
+    <section class="window-panel about-panel" id="about-panel" role="dialog" aria-modal="true" aria-labelledby="about-title" hidden>
+      <header><span>PROFILE.EXE</span><button type="button" data-close-panel aria-label="Close about panel">×</button></header>
+      <div class="panel-body about-layout">
+        <aside class="about-profile">
+          <div class="about-portrait">
+            <img src="assets/photos/studio/studio2.jpeg" alt="Aurora Maximova in a white dress against a red studio curtain" loading="lazy" decoding="async" />
+            <span>PLAYER 01</span>
+          </div>
+          <div class="about-stats">
+            <div><span>HEIGHT</span><strong>160 CM</strong></div>
+            <div><span>MEASUREMENTS</span><strong>73 / 59 / 79</strong></div>
+            <div><span>BASED IN</span><strong>RUSSIA</strong></div>
+            <div><span>LANGUAGES</span><strong>RU · EN · HY</strong></div>
+          </div>
+        </aside>
+        <div class="about-story">
+          <p class="kicker">◎ MEET THE PLAYER</p>
+          <h2 id="about-title">AURORA<br />MAXIMOVA</h2>
+          <div class="social-signal"><span>PUBLIC PROFILE · RORY :P · SHE/HER · MODEL</span><strong>“to break barriers, to reach for the stars 🐰”</strong></div>
+          <p class="lede">My name is Aurora, and I’m a model, creative, and visual storyteller based in Russia. For me, modeling has never been only about standing in front of a camera. It is a way to explore identity, fashion, emotion, and the different sides of my personality.</p>
+
+          <section class="story-block"><h3>HOW IT STARTED</h3><p>I discovered my interest in modeling at a young age and started experimenting with it when I was around 15. My journey began quite unexpectedly: my first professional photoshoot happened after I was approached by a photographer on the street. That experience made me realize that I genuinely enjoyed being in front of the camera, and it encouraged me to take modeling more seriously. After that, I began working on TFP projects, building my portfolio and learning how to create images that actually feel like me.</p></section>
+
+          <section class="story-block"><h3>THE WHOLE IMAGE</h3><p>Since then, I’ve become increasingly involved not only as a model, but also as a creative part of the process. In many of my projects, I choose the location, develop the concept, create my own styling, and do my own makeup and hair. I’m especially passionate about fashion because I see clothing and beauty as a form of self-expression rather than simply something aesthetic. I also edit and retouch many of my own photographs, which allows me to stay involved from the first idea all the way to the final image.</p></section>
+
+          <section class="story-block"><h3>PERSONAL STYLE</h3><p>One of the biggest parts of my personal style is gyaru. It is the aesthetic I feel most connected to and the style I naturally wear in my everyday life. Because of that, some of my favorite shoots are the ones where I can bring this part of myself into the concept. At the same time, I don’t want to limit myself to one aesthetic. I enjoy experimenting with editorial fashion, portraits, street photography, darker concepts, feminine styling, unusual locations, and completely different visual moods.</p></section>
+
+          <section class="story-block"><h3>BEYOND MODELING</h3><p>I’m naturally very curious and tend to become deeply involved in anything that interests me. Outside of modeling, I’m passionate about astrophysics and technology, and I have been interested in programming since I was young. I also enjoy drawing, dancing, sports, fashion, photography, and other creative projects. I like learning new things and constantly looking for ways to develop myself, whether that means improving my English, learning something technical, experimenting with a new visual style, or simply trying something I have never done before.</p></section>
+
+          <section class="story-block"><h3>COLLABORATION</h3><p>I think this curiosity is also a big part of how I approach modeling. I’m not interested in simply reproducing the same image over and over again. I want to understand the concept, contribute ideas, experiment, and see how far a creative direction can be taken. I especially enjoy working with people who have their own vision and are open to collaboration.</p></section>
+
+          <section class="story-block"><h3>A LIVING ARCHIVE</h3><p>My portfolio is therefore not just a collection of photographs. It is a record of how I have grown creatively and personally. Every shoot represents a different period, idea, or side of me — from my very first professional experience, to my early studio work, to self-organized gyaru shoots and collaborations with photographers and other creatives.</p></section>
+
+          <section class="story-block"><h3>WHAT COMES NEXT</h3><p>I’m still at the beginning of my professional modeling journey, and I see that as something exciting rather than limiting. There is still so much I want to learn, experience, and create. I want to continue developing my skills, work with new photographers and creative teams, explore different areas of fashion and editorial photography, and eventually take part in larger productions.</p><p>Most importantly, I want my work to feel authentic. I want the people looking through my portfolio to see not only a model, but a person with her own ideas, interests, personality, and perspective.</p><p class="story-signoff">This is me — still learning, still experimenting, and constantly creating.</p></section>
+        </div>
+      </div>
+    </section>
+
+    <section class="window-panel contact-panel" id="contact-panel" role="dialog" aria-modal="true" aria-labelledby="contact-title" hidden>
+      <header><span>CONNECT.EXE</span><button type="button" data-close-panel aria-label="Close contact panel">×</button></header>
+      <div class="panel-body">
+        <p class="kicker">STATUS: AVAILABLE</p>
+        <h2 id="contact-title">LET'S MAKE<br />SOMETHING ♡</h2>
+        <p>I’m always happy to connect. Reach out with questions, ideas, or project inquiries, and I’ll get back to you as soon as possible.</p>
+        <div class="contact-list">
+          <div class="contact-item"><span>NAME</span><strong>Aurora Maximova</strong></div>
+          <a href="mailto:avrora.maximova@gmail.com"><span>EMAIL</span><strong>avrora.maximova@gmail.com →</strong></a>
+          <!-- personal phone removed -->
+          <!-- personal phone removed -->
+          <a href="https://www.instagram.com/wveerie" target="_blank" rel="noreferrer"><span>INSTAGRAM</span><strong>@wveerie →</strong></a>
+          <a href="https://www.threads.net/@wveerie" target="_blank" rel="noreferrer"><span>THREADS</span><strong>@wveerie →</strong></a>
+          <a href="https://kavyar.com/cf1ewuriisyk" target="_blank" rel="noreferrer"><span>KAVYAR</span><strong>OPEN PROFILE →</strong></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="window-panel quest-panel" id="quest-panel" role="dialog" aria-modal="true" aria-labelledby="quest-title" hidden>
+      <header><span>QUEST_LOG.EXE</span><button type="button" data-close-panel aria-label="Close quest log">×</button></header>
+      <div class="panel-body">
+        <p class="kicker">PLAYER 01 · LOCAL SAVE FILE</p>
+        <h2 id="quest-title">ARCHIVE<br />QUESTS</h2>
+        <p>Explore Aurora’s world. Progress is saved only in this browser and never leaves your device.</p>
+        <div class="quest-list">
+          <div class="quest-row" data-quest-row="portfolio"><i>01</i><div><strong>ENTER THE ARCHIVE</strong><span>Visit Portfolio</span></div><b>OPEN</b></div>
+          <div class="quest-row" data-quest-row="series"><i>02</i><div><strong>OPEN A STORY</strong><span>Open one photo series</span></div><b>OPEN</b></div>
+          <div class="quest-row" data-quest-row="viewer"><i>03</i><div><strong>INSPECT A MEMORY</strong><span>Open any image fullscreen</span></div><b>OPEN</b></div>
+          <div class="quest-row" data-quest-row="profile"><i>04</i><div><strong>MEET THE PLAYER</strong><span>Read About Me</span></div><b>OPEN</b></div>
+          <div class="quest-row" data-quest-row="press"><i>05</i><div><strong>FIND THE MAGAZINE</strong><span>Visit Projects</span></div><b>OPEN</b></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="scan-lightbox" id="scan-lightbox" role="dialog" aria-modal="true" aria-labelledby="scan-caption" hidden>
+      <button class="scan-close" type="button" data-close-scan aria-label="Close fullscreen image viewer">×</button>
+      <div class="scan-stage">
+        <button class="scan-nav scan-prev" type="button" data-scan-prev aria-label="Previous image">←</button>
+        <img id="scan-lightbox-image" alt="" />
+        <button class="scan-nav scan-next" type="button" data-scan-next aria-label="Next image">→</button>
+      </div>
+      <p id="scan-caption"></p>
+    </section>
+
+    <div class="corner-actions">
+      <button class="play-ronia" type="button" data-play-ronia aria-label="Play Ronia"><span>♥</span>PLAY RONIA</button>
+      <button class="save-point" type="button" data-save-point aria-label="Save archive progress"><span>✦</span>SAVE POINT</button>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+      <span class="toast-icon">✦</span>
+      <div><strong>NEW ENTRY UNLOCKED</strong><p id="toast-copy">Welcome to the archive.</p></div>
+      <button type="button" id="toast-close" aria-label="Close notification">×</button>
+    </div>
+  </body>
+</html>
