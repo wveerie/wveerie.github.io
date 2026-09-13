@@ -48,7 +48,7 @@ const techNavMarkup = `
   <button type="button" data-route="/tech/contact"><span>✉</span>CONTACT</button>`;
 
 const photo = (folder, filename) => `assets/photos/${folder}/${filename}`;
-const SPRITE_ASSET_REVISION = '20260914-violet-run-human-jump-idle-v2-normalized';
+const SPRITE_ASSET_REVISION = '20260914-motion-hotfix-v1';
 const spriteFrames = (folder, count) => Array.from(
   { length: count },
   (_, index) => `${folder}/frame-${String(index + 1).padStart(2, '0')}.png?v=${SPRITE_ASSET_REVISION}`,
@@ -87,14 +87,50 @@ const introAnimations = {
 };
 
 const INTRO_TIMING = Object.freeze({
-  run: 120,
-  catsRun: 104,
+  run: 100,
+  catsRun: 100,
   jump: 118,
   idle: 150,
   catsIdle: 155,
   pet: 160,
   jumpDuration: 960,
 });
+
+const introFrameCache = new Map();
+
+function preloadIntroFrame(source, priority = 'low') {
+  if (introFrameCache.has(source)) return introFrameCache.get(source);
+  const image = new Image();
+  const record = { image, ready: false };
+  const markReady = () => { record.ready = Boolean(image.complete && image.naturalWidth); };
+  image.decoding = 'async';
+  image.fetchPriority = priority;
+  image.addEventListener('load', markReady, { once: true });
+  image.addEventListener('error', markReady, { once: true });
+  image.src = source;
+  if (image.complete) markReady();
+  image.decode?.().then(markReady).catch(() => {});
+  introFrameCache.set(source, record);
+  return record;
+}
+
+const criticalIntroFrames = [
+  ...introAnimations.run,
+  ...introAnimations.catsRun,
+  ...introAnimations.jump,
+  ...introAnimations.catsJump,
+];
+const deferredIntroFrames = [
+  ...introAnimations.idle,
+  ...introAnimations.catsIdle,
+  ...introAnimations.petScene,
+];
+[...new Set(criticalIntroFrames)].forEach((source) => preloadIntroFrame(source, 'high'));
+const preloadDeferredIntroFrames = () => {
+  [...new Set(deferredIntroFrames)].forEach((source) => preloadIntroFrame(source));
+};
+if ('requestIdleCallback' in window) window.requestIdleCallback(preloadDeferredIntroFrames, { timeout: 1800 });
+else setTimeout(preloadDeferredIntroFrames, 500);
 
 const photos = {
   hero: photo('dgyaru', 'dgyaru4.jpeg'),
@@ -1123,7 +1159,6 @@ function showToast(message) {
 let introFrameRequest = 0;
 let introStartedAt = 0;
 let introExitStartedAt = 0;
-let introLastPaintAt = 0;
 let introPausedAt = 0;
 let introIsExiting = false;
 let introMode = 'idle';
@@ -1145,6 +1180,8 @@ let runnerJumpStartedAt = 0;
 let runnerJumpTimer = 0;
 let runnerRunHeld = false;
 let runnerJumpAutoStop = false;
+let runnerQueuedJumpUntil = 0;
+let runnerQueuedJumpAutoStop = false;
 let runnerDuckHeld = false;
 let runnerLastActionAt = 0;
 let runnerIdleAction = null;
@@ -1153,7 +1190,7 @@ let runnerIdleSequence = 0;
 let runnerEntities = [];
 let runnerHudSnapshot = '';
 let currentWorldDistance = 0;
-const INTRO_FRAME_INTERVAL = 1000 / 30;
+const RUNNER_JUMP_BUFFER_MS = 220;
 const CITY_LOOP_ASPECT = 3762 / 836;
 const RUNNER_BEST_KEY = 'wveerie-runner-best-v3';
 const runnerEntityTypes = [
@@ -1299,25 +1336,48 @@ function updateRunner(now) {
   updateRunnerHud();
 }
 
+function finishRunnerJump(now = performance.now()) {
+  if (!runnerIsAirborne) return;
+  const shouldAutoStop = runnerJumpAutoStop;
+  const shouldChainJump = runnerPlaying && !runnerDuckHeld && runnerQueuedJumpUntil >= now;
+  const chainedAutoStop = shouldAutoStop || runnerQueuedJumpAutoStop;
+  clearTimeout(runnerJumpTimer);
+  runnerJumpTimer = 0;
+  runnerIsAirborne = false;
+  runnerJumpAutoStop = false;
+  runnerQueuedJumpUntil = 0;
+  runnerQueuedJumpAutoStop = false;
+  introRonia.classList.remove('runner-airborne');
+  introRonia.style.removeProperty('bottom');
+  introCats.style.removeProperty('bottom');
+  if (shouldChainJump) {
+    jumpRunner({ autoStop: chainedAutoStop });
+    return;
+  }
+  if (shouldAutoStop && !runnerRunHeld) setRunnerMoving(false);
+}
+
 function jumpRunner({ autoStop = false } = {}) {
-  if (!runnerPlaying || runnerIsAirborne || runnerDuckHeld) return;
+  if (!runnerPlaying || runnerDuckHeld) return false;
+  if (runnerIsAirborne) {
+    const now = performance.now();
+    if (runnerQueuedJumpUntil < now) runnerQueuedJumpAutoStop = false;
+    runnerQueuedJumpUntil = now + RUNNER_JUMP_BUFFER_MS;
+    runnerQueuedJumpAutoStop ||= autoStop;
+    return false;
+  }
   clearTimeout(runnerJumpTimer);
   runnerIsAirborne = true;
   runnerJumpAutoStop = autoStop;
+  runnerQueuedJumpUntil = 0;
+  runnerQueuedJumpAutoStop = false;
   runnerJumpStartedAt = performance.now();
   markRunnerAction(runnerJumpStartedAt);
   introRonia.classList.remove('runner-airborne');
   void introRonia.offsetWidth;
   introRonia.classList.add('runner-airborne');
-  runnerJumpTimer = setTimeout(() => {
-    runnerIsAirborne = false;
-    introRonia.classList.remove('runner-airborne');
-    introRonia.style.removeProperty('bottom');
-    introCats.style.removeProperty('bottom');
-    if (runnerJumpAutoStop && !runnerRunHeld) setRunnerMoving(false);
-    runnerJumpAutoStop = false;
-    runnerJumpTimer = 0;
-  }, INTRO_TIMING.jumpDuration);
+  runnerJumpTimer = setTimeout(() => finishRunnerJump(), INTRO_TIMING.jumpDuration + 80);
+  return true;
 }
 
 function endRunnerGame() {
@@ -1330,6 +1390,8 @@ function endRunnerGame() {
   runnerIsAirborne = false;
   runnerRunHeld = false;
   runnerJumpAutoStop = false;
+  runnerQueuedJumpUntil = 0;
+  runnerQueuedJumpAutoStop = false;
   introRonia.classList.remove('runner-airborne');
   introRonia.style.removeProperty('bottom');
   introCats.style.removeProperty('bottom');
@@ -1357,6 +1419,8 @@ function startRunnerGame({ moving = false } = {}) {
   runnerIsAirborne = false;
   runnerRunHeld = false;
   runnerJumpAutoStop = false;
+  runnerQueuedJumpUntil = 0;
+  runnerQueuedJumpAutoStop = false;
   runnerDuckHeld = false;
   runnerIdleAction = null;
   introRonia.style.removeProperty('bottom');
@@ -1385,7 +1449,6 @@ function startRunnerGame({ moving = false } = {}) {
   setIntroMode(moving ? 'run' : 'idle');
   updateRunnerHud();
   cancelAnimationFrame(introFrameRequest);
-  introLastPaintAt = 0;
   introFrameRequest = requestAnimationFrame(animateIntro);
   requestAnimationFrame(() => roniaIntro.focus?.({ preventScroll: true }));
 }
@@ -1405,21 +1468,29 @@ function setIntroFrame(image, frames, elapsed, duration, once = false) {
   const index = once ? Math.min(frames.length - 1, rawIndex) : rawIndex % frames.length;
   if (image.dataset.frame === String(index)) return;
   const nextSource = frames[index];
+  const cachedFrame = preloadIntroFrame(nextSource);
+  if (!cachedFrame.ready && cachedFrame.image.complete && cachedFrame.image.naturalWidth) cachedFrame.ready = true;
+  if (!cachedFrame.ready) return;
   const previousSource = image.getAttribute('src');
   const ghost = introSpriteGhosts.get(image.id);
-  if (ghost && previousSource && previousSource !== nextSource && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const isRoniaIdle = image === introRonia && introMode === 'idle';
+  const shouldBlendIdle = image === introRonia
+    && introMode === 'idle'
+    && previousSource?.includes('/ronia/idle/')
+    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (ghost && previousSource && previousSource !== nextSource && shouldBlendIdle) {
     introSpriteFades.get(ghost)?.cancel();
     ghost.src = previousSource;
     const fade = ghost.animate(
-      [{ opacity: isRoniaIdle ? .12 : .24 }, { opacity: 0 }],
+      [{ opacity: .12 }, { opacity: 0 }],
       {
-        duration: isRoniaIdle ? 78 : Math.min(64, Math.max(44, duration * .55)),
+        duration: 78,
         easing: 'linear',
         fill: 'forwards',
       },
     );
     introSpriteFades.set(ghost, fade);
+  } else if (ghost) {
+    introSpriteFades.get(ghost)?.cancel();
   }
   image.dataset.frame = String(index);
   image.src = nextSource;
@@ -1495,11 +1566,6 @@ function animateRunnerIdle(now) {
 function animateIntro(now) {
   introFrameRequest = 0;
   if (!roniaIntro || roniaIntro.hidden || document.hidden) return;
-  if (introLastPaintAt && now - introLastPaintAt < INTRO_FRAME_INTERVAL) {
-    introFrameRequest = requestAnimationFrame(animateIntro);
-    return;
-  }
-  introLastPaintAt = now;
   if (!introStartedAt) introStartedAt = now;
   const elapsed = now - introStartedAt;
 
@@ -1514,6 +1580,7 @@ function animateIntro(now) {
     setIntroFrame(introCats, introAnimations.catsJump, jumpElapsed, INTRO_TIMING.jump, true);
   } else if (introGameActive) {
     if (runnerPlaying) {
+      if (runnerIsAirborne && now - runnerJumpStartedAt >= INTRO_TIMING.jumpDuration) finishRunnerJump(now);
       updateRunner(now);
       if (runnerIsAirborne) {
         setIntroMode('jump');
@@ -1641,6 +1708,8 @@ function enterFromIntro({ skip = false } = {}) {
   if (!roniaIntro || roniaIntro.hidden || introIsExiting) return;
   clearTimeout(runnerJumpTimer);
   runnerJumpTimer = 0;
+  runnerQueuedJumpUntil = 0;
+  runnerQueuedJumpAutoStop = false;
   runnerPlaying = false;
   runnerMoving = false;
   roniaIntro.classList.remove('world-moving');
@@ -1700,6 +1769,15 @@ function initRoniaIntro() {
   roniaIntro.dataset.mode = 'run';
   roniaIntro.dataset.session = 'prologue';
   [introRonia, introCats, introPetScene].forEach((image) => { image.hidden = false; });
+  roniaIntro.addEventListener('pointerdown', (event) => {
+    if (!introGameActive || !runnerPlaying || introIsExiting) return;
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    if (event.target.closest('button, a, [role="button"]')) return;
+    event.preventDefault();
+    const autoStop = !runnerRunHeld && !runnerMoving;
+    setRunnerMoving(true);
+    jumpRunner({ autoStop });
+  });
   roniaIntro.addEventListener('click', (event) => {
     if (event.target.closest('[data-run-control]')) return;
     if (event.target.closest('[data-intro-music]')) {
@@ -1718,10 +1796,6 @@ function initRoniaIntro() {
       enterFromIntro();
       return;
     }
-    if (introGameActive && runnerPlaying) {
-      setRunnerMoving(true);
-      jumpRunner({ autoStop: true });
-    }
   });
   requestAnimationFrame(() => document.querySelector('[data-intro-enter]')?.focus({ preventScroll: true }));
   if (!document.hidden) introFrameRequest = requestAnimationFrame(animateIntro);
@@ -1735,13 +1809,14 @@ function useIntroControl(control) {
     setRunnerMoving(false);
     return;
   }
-  if (!introGameActive || !runnerPlaying) startRunnerGame({ moving: action !== 'stop' });
+  const wasMoving = runnerMoving;
+  if (!introGameActive || !runnerPlaying) startRunnerGame({ moving: action === 'run' });
   if (action === 'run') {
     runnerRunHeld = true;
     setRunnerMoving(true);
   }
   if (action === 'jump') {
-    const autoStop = !runnerRunHeld && !runnerMoving;
+    const autoStop = !runnerRunHeld && !wasMoving;
     setRunnerMoving(true);
     jumpRunner({ autoStop });
   }
@@ -1750,8 +1825,12 @@ function useIntroControl(control) {
 document.querySelectorAll('[data-run-control]').forEach((control) => {
   control.addEventListener('pointerdown', (event) => {
     event.preventDefault();
-    control.setPointerCapture?.(event.pointerId);
     useIntroControl(control);
+    try {
+      control.setPointerCapture?.(event.pointerId);
+    } catch {
+      // The action has already happened even if this browser declines pointer capture.
+    }
   });
   if (control.dataset.runControl === 'run') {
     const stopHolding = () => {
@@ -1917,7 +1996,6 @@ document.addEventListener('visibilitychange', () => {
   }
   introPausedAt = 0;
   runnerLastFrameAt = now;
-  introLastPaintAt = 0;
   setIntroWorldPosition();
   if (roniaIntro && !roniaIntro.hidden && !introFrameRequest) {
     introFrameRequest = requestAnimationFrame(animateIntro);
