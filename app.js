@@ -137,6 +137,40 @@ const photos = {
   profile: photo('snaps', 'snap1.jpg'),
 };
 
+const knownMediaDimensions = new Map([
+  [photo('snaps', 'snap1.jpg'), [900, 1200]],
+  [photo('snaps', 'snap2.jpg'), [720, 1200]],
+  [photo('snaps', 'snap3.jpg'), [900, 1200]],
+  [photo('snaps', 'snap4.jpg'), [900, 1200]],
+  [photo('water', 'water1.jpeg'), [1500, 1000]],
+  [photo('water', 'water4.jpeg'), [1500, 1000]],
+  [photo('water', 'water7.jpeg'), [1500, 999]],
+  [photo('dgyaru', 'dgyaru5.jpeg'), [1500, 1001]],
+  [photo('dgyaru', 'dgyaru6.jpeg'), [1500, 1001]],
+  [photo('dgyaru', 'dgyaru8.jpeg'), [1500, 1001]],
+  [photo('street', 'street3.jpeg'), [1500, 1000]],
+  [photo('street', 'street5.jpeg'), [1500, 1000]],
+  [photo('gagik', 'gagik1.jpeg'), [1500, 1641]],
+  [photo('gagik', 'gagik4.jpeg'), [1500, 1000]],
+  ['assets/publications/edith-1456-spread-46-47.jpg', [2600, 1694]],
+  ['assets/publications/edith-1456-spread-48-49.jpg', [2600, 1694]],
+  ['assets/publications/edith-1456-spread-50-51.jpg', [2600, 1694]],
+  ['assets/publications/iconique-sept-2026-page-32.jpg', [2550, 3300]],
+  ['assets/publications/iconique-sept-2026-page-33.jpg', [2550, 3300]],
+  ['assets/publications/iconique-sept-2026-page-34.jpg', [1700, 2200]],
+]);
+
+function resolveMediaLayout(src, orientation = 'auto') {
+  const dimensions = knownMediaDimensions.get(src);
+  const requestedOrientation = safeMediaOrientation(orientation);
+  const ratio = dimensions ? dimensions[0] / dimensions[1] : 0;
+  const knownOrientation = ratio >= 1.8 ? 'panorama' : ratio > 1.1 ? 'landscape' : ratio < .9 ? 'portrait' : 'square';
+  return {
+    orientation: requestedOrientation === 'auto' && dimensions ? knownOrientation : requestedOrientation,
+    aspectStyle: dimensions ? ` style="--media-aspect:${dimensions[0]} / ${dimensions[1]}"` : '',
+  };
+}
+
 const coreShoots = [
   {
     slug: 'dark-romance',
@@ -754,10 +788,59 @@ function footer() {
 }
 
 function mediaButton({ src, group, caption, alt, className = 'media-button', label = 'OPEN FULLSCREEN +', orientation = 'auto' }) {
-  return `<button class="${className}" type="button" data-auto-media-card data-orientation="${safeMediaOrientation(orientation)}" data-media-src="${src}" data-media-group="${group}" data-media-caption="${caption}" aria-label="Open ${caption} fullscreen">
+  const layout = resolveMediaLayout(src, orientation);
+  return `<button class="${className}" type="button" data-auto-media-card data-orientation="${layout.orientation}"${layout.aspectStyle} data-media-src="${src}" data-media-group="${group}" data-media-caption="${caption}" aria-label="Open ${caption} fullscreen">
     <img src="${src}" alt="${alt}" loading="lazy" decoding="async" />
     <span class="zoom-hint">${label}</span>
   </button>`;
+}
+
+const SMOOTH_PHOTO_SELECTOR = [
+  '.creative-profile-photo',
+  '.about-portrait img',
+  '.hero-photo img',
+  '.shoot-card img',
+  '[data-media-src] img',
+  '.project-card img',
+].join(',');
+let smoothPhotoLoadToken = 0;
+
+function prepareSmoothPhoto(image, { replay = false, source } = {}) {
+  if (!image || (!replay && image.dataset.photoLoadBound === 'true')) return;
+  if (!replay) image.dataset.photoLoadBound = 'true';
+  const token = String(++smoothPhotoLoadToken);
+  let settled = false;
+  image.dataset.photoLoadToken = token;
+  image.classList.remove('photo-loaded');
+  image.classList.add('photo-loading');
+
+  const reveal = () => {
+    if (settled || image.dataset.photoLoadToken !== token) return;
+    settled = true;
+    const decoded = typeof image.decode === 'function' ? image.decode().catch(() => {}) : Promise.resolve();
+    decoded.then(() => requestAnimationFrame(() => {
+      if (image.dataset.photoLoadToken !== token) return;
+      image.classList.remove('photo-loading');
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) image.classList.add('photo-loaded');
+    }));
+  };
+  const revealError = () => {
+    if (settled || image.dataset.photoLoadToken !== token) return;
+    settled = true;
+    image.classList.remove('photo-loading', 'photo-loaded');
+  };
+
+  image.addEventListener('load', reveal, { once: true });
+  image.addEventListener('error', revealError, { once: true });
+  if (typeof source === 'string') image.src = source;
+  if (image.complete) {
+    if (image.naturalWidth) reveal();
+    else if (image.getAttribute('src')) revealError();
+  }
+}
+
+function initSmoothPhotoLoading(root = document) {
+  root.querySelectorAll(SMOOTH_PHOTO_SELECTOR).forEach((image) => prepareSmoothPhoto(image));
 }
 
 function classifyMediaImage(image) {
@@ -918,10 +1001,12 @@ function renderProjects() {
             ${item.scans.map((scan, index) => {
               const pages = item.scanPages[index];
               const pageWord = item.scanLabel === 'SPREAD' ? 'pages' : 'page';
-              const orientation = item.layout === 'portrait' ? 'portrait' : safeMediaOrientation(item.scanMeta?.[index]?.orientation);
+              const declaredOrientation = item.layout === 'portrait' ? 'portrait' : safeMediaOrientation(item.scanMeta?.[index]?.orientation);
+              const orientation = declaredOrientation === 'auto' && item.scanLabel === 'SPREAD' ? 'landscape' : declaredOrientation;
+              const layout = resolveMediaLayout(scan, orientation);
               const leadClass = item.layout !== 'portrait' && index === 0 ? 'scan-card-lead' : '';
               const portraitClass = item.layout === 'portrait' ? 'scan-card-portrait' : '';
-              return `<button class="scan-card ${leadClass} ${portraitClass}" type="button" data-auto-media-card data-orientation="${orientation}" data-media-src="${scan}" data-media-group="publication-${item.slug}" data-media-caption="${item.publication} · ${item.viewerIssue} · ${item.scanLabel} ${pages}" aria-label="Open ${item.publication} ${pageWord} ${pages}"><img src="${scan}" alt="${item.publication} ${pageWord} ${pages} featuring Aurora Maximova" loading="lazy" decoding="async" /><span>OPEN ${item.scanLabel} · ${pages} ↗</span></button>`;
+              return `<button class="scan-card ${leadClass} ${portraitClass}" type="button" data-auto-media-card data-orientation="${layout.orientation}"${layout.aspectStyle} data-media-src="${scan}" data-media-group="publication-${item.slug}" data-media-caption="${item.publication} · ${item.viewerIssue} · ${item.scanLabel} ${pages}" aria-label="Open ${item.publication} ${pageWord} ${pages}"><img src="${scan}" alt="${item.publication} ${pageWord} ${pages} featuring Aurora Maximova" loading="lazy" decoding="async" /><span>OPEN ${item.scanLabel} · ${pages} ↗</span></button>`;
             }).join('')}
           </div>
         </article>`).join('')}
@@ -988,6 +1073,7 @@ function renderRoute() {
 
   if (!path.startsWith('/shoot/')) document.title = path.startsWith('/tech') ? 'WVEERIE.SYS — Aurora Maximova' : 'WVEERIE — Aurora Maximova';
   view.innerHTML = markup;
+  initSmoothPhotoLoading(view);
   initAdaptiveMedia();
   setActiveNav(path);
   window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1084,8 +1170,8 @@ function showActiveMedia() {
   if (!activeMediaItems.length) return;
   activeMediaIndex = (activeMediaIndex + activeMediaItems.length) % activeMediaItems.length;
   const item = activeMediaItems[activeMediaIndex];
-  scanImage.src = item.src;
   scanImage.alt = item.alt || item.caption;
+  prepareSmoothPhoto(scanImage, { replay: true, source: item.src });
   scanCaption.textContent = `${item.caption} · ${activeMediaIndex + 1} / ${activeMediaItems.length}`;
   const hasMultiple = activeMediaItems.length > 1;
   scanLightbox.querySelector('[data-scan-prev]').hidden = !hasMultiple;
@@ -2022,6 +2108,7 @@ document.querySelector('.brand-link').addEventListener('click', () => {
   }
 });
 
+initSmoothPhotoLoading(document);
 applyPortfolioSide(activePortfolioSide, { persist: false });
 updateGameUI();
 if (roniaIntro) initRoniaIntro();
