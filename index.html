@@ -4,30 +4,35 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f6edf8" />
-    <meta name="description" content="WVEERIE — Aurora Maximova's creative and technical portfolio." />
+    <meta name="description" content="WVEERIE is Aurora Maximova's personal archive: modeling, art, technology, work, and the stories behind them. Employers can request a separate résumé." />
     <meta name="robots" content="noindex, nofollow, noarchive" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="WVEERIE — Aurora Maximova" />
-    <meta property="og:description" content="Choose a side of Aurora Maximova's world: creative modeling archive or technical IT portfolio." />
+    <meta property="og:description" content="A personal archive of Aurora Maximova's creative work, technology interests, and experience — not a replacement for a tailored résumé." />
     <meta property="og:url" content="https://wveerie.github.io" />
     <meta property="og:image" content="https://wveerie.github.io/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="WVEERIE — Aurora Maximova" />
-    <meta name="twitter:description" content="Choose a side of Aurora Maximova's world: creative modeling archive or technical IT portfolio." />
+    <meta name="twitter:description" content="A personal archive of Aurora Maximova's creative work, technology interests, and experience — not a replacement for a tailored résumé." />
     <meta name="twitter:image" content="https://wveerie.github.io/og.png" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23ee65ad'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-size='38' fill='white'%3E%E2%99%A1%3C/text%3E%3C/svg%3E" />
     <title>WVEERIE — Aurora Maximova</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Nunito:wght@400;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;family=Nunito:wght@400;600;700;800;900&amp;family=Press+Start+2P&amp;display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
+    <noscript><style>
+      .sidebar, .mobile-bar, .corner-actions { display: none !important; }
+      .view { margin-left: 0 !important; padding-top: 0 !important; }
+      .static-overview { display: block !important; }
+    </style></noscript>
     <script src="content/uploads.js" defer></script>
     <script src="app.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#view" data-skip-content>Skip to content</a>
 
-    <section class="ronia-intro" id="ronia-intro" data-session="prologue" aria-label="Ronia pixel runner introduction" tabindex="-1">
+    <section class="ronia-intro" id="ronia-intro" data-session="prologue" aria-label="Ronia pixel runner introduction" tabindex="-1" hidden>
       <div class="intro-city" aria-hidden="true"></div>
       <div class="intro-atmosphere" aria-hidden="true"></div>
       <div class="intro-clouds" aria-hidden="true"></div>
@@ -62,6 +67,11 @@
         <img class="intro-sprite intro-pet-scene intro-sprite-ghost" data-ghost-for="intro-pet-scene" src="assets/game/v3/sprites/pet-scene/frame-01.png?v=20260914-motion-hotfix-v1" alt="" decoding="async" />
         <div class="intro-world" id="intro-world"></div>
       </div>
+      <p class="intro-greeting"><strong>RONIA:</strong> Greetings, brave explorer! Katsu and I will guide you through Aurora’s little world ♡</p>
+      <div class="intro-prologue-actions" role="group" aria-label="Choose how to enter Aurora's archive">
+        <button type="button" data-intro-quick><span>PORTFOLIO FIRST</span><strong>QUICK VIEW</strong></button>
+        <button type="button" data-intro-story><span>GAME FIRST</span><strong>PLAY RONIA</strong></button>
+      </div>
       <button class="intro-enter" type="button" data-intro-enter>
         <span>RONIA WILL LEAD THE WAY ♡</span>
         <strong>CLICK ANYWHERE TO ENTER</strong>
@@ -73,7 +83,7 @@
       </div>
       <button class="intro-skip" type="button" data-intro-skip>SKIP &gt;&gt;</button>
       <button class="intro-music" type="button" data-intro-music aria-pressed="false">♫ MUSIC SOON</button>
-      <p class="intro-hint" id="intro-hint">RUNNING TO THE ARCHIVE… CLICK ANYWHERE TO ENTER ♡</p>
+      <p class="intro-hint" id="intro-hint">CHOOSE QUICK VIEW OR PLAY RONIA ♡</p>
       <section class="intro-gameover" id="intro-gameover" aria-labelledby="intro-gameover-title" hidden>
         <span>♡ SAVE POINT MISSED ♡</span>
         <h2 id="intro-gameover-title">GAME OVER</h2>
@@ -92,10 +102,10 @@
       <header class="side-select-head">
         <p>RONIA // ROUTE SELECT</p>
         <h1 id="side-select-title">CHOOSE YOUR PATH</h1>
-        <span>One player · two sides</span>
+        <span>Aurora’s personal archive · creative work or tech experience</span>
       </header>
       <div class="side-options">
-        <button class="side-option side-option-tech" type="button" data-choose-side="tech" aria-label="For tech teams and engineers: open Aurora's technical portfolio">
+        <button class="side-option side-option-tech" type="button" data-choose-side="tech" aria-label="Explore Aurora's technology interests and work experience">
           <span class="side-number">LEFT · LOGIC</span>
           <strong>TECH</strong>
           <small>People, systems &amp; code</small>
@@ -106,7 +116,7 @@
           <span class="brain-side-glow brain-side-glow-right"></span>
           <img class="side-brain-art" src="assets/game/v3/ui/ronia-mind-choice-v3.png" alt="" loading="lazy" decoding="async" fetchpriority="low" />
         </div>
-        <button class="side-option side-option-creative" type="button" data-choose-side="creative" aria-label="For model agencies and creative teams: open Aurora's modeling portfolio">
+        <button class="side-option side-option-creative" type="button" data-choose-side="creative" aria-label="Explore Aurora's modeling, art, and photo shoots">
           <span class="side-number">RIGHT · IMAGINATION</span>
           <strong>CREATIVE</strong>
           <small>Modeling, stories &amp; art</small>
@@ -167,10 +177,72 @@
 
       <header class="mobile-bar">
         <button class="mobile-brand" type="button" data-route="/home">WVEERIE <span id="mobile-level">LVL 01</span></button>
-        <button class="menu-toggle" id="menu-toggle" type="button" aria-controls="sidebar" aria-expanded="false">MENU +</button>
+        <nav class="top-nav" id="top-nav" aria-label="Primary navigation">
+          <button type="button" data-route="/portfolio">PORTFOLIO</button>
+          <button type="button" data-panel="about">ABOUT</button>
+          <button type="button" data-panel="contact">CONTACT</button>
+        </nav>
+        <div class="top-bar-actions">
+          <button class="top-side-switch" type="button" data-side-toggle aria-label="Switch to the technical portfolio">⌘ TECH SIDE ↗</button>
+          <button class="menu-toggle" id="menu-toggle" type="button" aria-controls="sidebar" aria-expanded="false" aria-label="Open main menu">OPEN MENU +</button>
+        </div>
       </header>
 
-      <main class="view" id="view" tabindex="-1" aria-live="polite"></main>
+      <p id="route-status" class="sr-only" role="status" aria-live="polite"></p>
+      <main class="view" id="view" tabindex="-1">
+        <div class="static-overview page content-page">
+          <header class="page-head">
+            <p class="kicker">PERSONAL ARCHIVE · AURORA MAXIMOVA</p>
+            <h1 class="page-title">WVEERIE</h1>
+            <p class="page-intro">Hello, I’m Aurora. This is a place to get to know me through modeling, visual work, technology, and the projects I care about.</p>
+            <p>This website is a personal archive for anyone curious about my work and interests. It is not a formal job application or a replacement for a résumé; employers are welcome to request a separate résumé tailored to the role.</p>
+            <nav class="static-actions" aria-label="Jump to an archive section">
+              <a class="game-button primary" href="#static-creative">CREATIVE WORK</a>
+              <a class="game-button" href="#static-tech">TECH &amp; EXPERIENCE</a>
+              <a class="game-button" href="#static-contact">SKIP TO CONTACT</a>
+            </nav>
+          </header>
+
+          <section class="static-section" id="static-creative" aria-labelledby="static-creative-title">
+            <h2 id="static-creative-title">Creative work</h2>
+            <p>I’m a model and visual storyteller. My archive includes self-organized gyaru shoots, editorial portraits, model snaps, experiments, and magazine publications. Open a photograph from each original series below:</p>
+            <div class="static-grid">
+              <article class="static-card"><h3>Dark Romance</h3><p>Black-and-white editorial and portrait series.</p><a href="assets/photos/bw/bw7.jpeg">Open series photograph ↗</a></article>
+              <article class="static-card"><h3>Summer Elegy</h3><p>An expressive outdoor story.</p><a href="assets/photos/water/water8.jpeg">Open series photograph ↗</a></article>
+              <article class="static-card"><h3>After Dark</h3><p>A self-organized gyaru fashion shoot.</p><a href="assets/photos/dgyaru/dgyaru4.jpeg">Open series photograph ↗</a></article>
+              <article class="static-card"><h3>La Nuit</h3><p>A studio editorial with styling and makeup by me.</p><a href="assets/photos/studio/studio2.jpeg">Open series photograph ↗</a></article>
+              <article class="static-card"><h3>Club 2000</h3><p>Gyaru-inspired fashion and glamour.</p><a href="assets/photos/gyaru/gyaru5.jpeg">Open series photograph ↗</a></article>
+              <article class="static-card"><h3>Soft Riot</h3><p>A street-style portrait story.</p><a href="assets/photos/street/street2.jpeg">Open series photograph ↗</a></article>
+              <article class="static-card"><h3>Solitude</h3><p>A studio portrait series by Gagik Vagramyan.</p><a href="assets/photos/gagik/gagik3.jpeg">Open series photograph ↗</a></article>
+              <article class="static-card"><h3>Untitled</h3><p>My first professional photoshoot.</p><a href="assets/photos/personal/random1.jpeg">Open series photograph ↗</a></article>
+              <article class="static-card"><h3>Model snaps</h3><p>Clean professional references for casting.</p><a href="assets/photos/snaps/snap1.jpg">Open model snap ↗</a></article>
+              <article class="static-card"><h3>Edith Magazine</h3><p>Issue 1456, August 2026.</p><a href="assets/publications/edith-1456-spread-46-47.jpg">Open magazine spread ↗</a></article>
+              <article class="static-card"><h3>ICONIQUE</h3><p>September 2026, volume 2.</p><a href="assets/publications/iconique-sept-2026-page-32.jpg">Open magazine page ↗</a></article>
+            </div>
+          </section>
+
+          <section class="static-section" id="static-tech" aria-labelledby="static-tech-title">
+            <h2 id="static-tech-title">Technology &amp; experience</h2>
+            <p>I’m an IT recruiter with an interest in programming, digital products, and how people and technical teams work together. I’ve explored Python, C#, APIs, Agile processes, and AI tools. My background in physics and mathematics shaped the way I organize information and approach problems.</p>
+            <div class="static-grid">
+              <article class="static-card"><h3>WebProPresents</h3><p>Junior HR · part-time · October 2025 – April 2026. Recruitment support, candidate communication, records, and internal workflows.</p></article>
+              <article class="static-card"><h3>CinemaClub</h3><p>Data Entry Assistant · freelance · June – November 2024. Actor research, organized databases, and accurate records.</p></article>
+              <article class="static-card"><h3>Freelance</h3><p>Tutor &amp; Childcare Assistant · May 2022 – present. Communication, trust, adaptability, and support for different learning needs.</p></article>
+            </div>
+            <p>For a specific role, please ask me for a tailored résumé instead of treating this personal archive as one.</p>
+          </section>
+
+          <section class="static-section" id="static-contact" aria-labelledby="static-contact-title">
+            <h2 id="static-contact-title">Contact</h2>
+            <p>For collaboration, casting, technical roles, or a tailored résumé, you can reach me by email or through my public profiles.</p>
+            <div class="static-actions">
+              <a href="mailto:avrora.maximova@gmail.com">Email Aurora ↗</a>
+              <a href="https://www.instagram.com/wveerie" rel="noreferrer">Instagram @wveerie ↗</a>
+              <a href="https://pinterest.com/wveerie/" rel="noreferrer">Pinterest @wveerie ↗</a>
+            </div>
+          </section>
+        </div>
+      </main>
     </div>
 
     <div class="panel-backdrop" id="panel-backdrop" hidden></div>
@@ -222,8 +294,6 @@
         <div class="contact-list">
           <div class="contact-item"><span>NAME</span><strong>Aurora Maximova</strong></div>
           <a href="mailto:avrora.maximova@gmail.com"><span>EMAIL</span><strong>avrora.maximova@gmail.com →</strong></a>
-          <!-- personal phone removed -->
-          <!-- personal phone removed -->
           <a href="https://www.instagram.com/wveerie" target="_blank" rel="noreferrer"><span>INSTAGRAM</span><strong>@wveerie →</strong></a>
           <a href="https://pinterest.com/wveerie/" target="_blank" rel="noreferrer"><span>PINTEREST</span><strong>@wveerie →</strong></a>
           <a href="https://kavyar.com/cf1ewuriisyk" target="_blank" rel="noreferrer"><span>KAVYAR</span><strong>OPEN PROFILE →</strong></a>

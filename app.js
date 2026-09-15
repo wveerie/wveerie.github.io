@@ -1,7 +1,12 @@
 const view = document.querySelector('#view');
+const skipContentLink = document.querySelector('[data-skip-content]');
+const routeStatus = document.querySelector('#route-status');
 const sidebar = document.querySelector('#sidebar');
 const appShell = document.querySelector('.app-shell');
 const mainNav = document.querySelector('#main-nav');
+const topNav = document.querySelector('#top-nav');
+const topSideSwitch = document.querySelector('.top-side-switch');
+const topBrand = document.querySelector('.mobile-brand');
 const menuToggle = document.querySelector('#menu-toggle');
 const backdrop = document.querySelector('#panel-backdrop');
 const aboutPanel = document.querySelector('#about-panel');
@@ -39,13 +44,15 @@ const introMusicButton = document.querySelector('[data-intro-music]');
 const introPixelWipe = document.querySelector('#intro-pixel-wipe');
 const cornerActions = document.querySelector('.corner-actions');
 const creativeNavMarkup = mainNav?.innerHTML || '';
+const creativeTopNavMarkup = topNav?.innerHTML || '';
 const techNavMarkup = `
-  <button type="button" data-route="/tech"><span>⌂</span>TECH HOME</button>
   <button type="button" data-route="/tech/about"><span>◉</span>ABOUT ME</button>
   <button type="button" data-route="/tech/experience"><span>▤</span>EXPERIENCE</button>
-  <button type="button" data-route="/tech/skills"><span>⌘</span>SKILLS</button>
-  <button type="button" data-route="/tech/education"><span>◇</span>EDUCATION</button>
   <button type="button" data-route="/tech/contact"><span>✉</span>CONTACT</button>`;
+const techTopNavMarkup = `
+  <button type="button" data-route="/tech/about">ABOUT</button>
+  <button type="button" data-route="/tech/experience">EXPERIENCE</button>
+  <button type="button" data-route="/tech/contact">CONTACT</button>`;
 
 const photo = (folder, filename) => `assets/photos/${folder}/${filename}`;
 const SPRITE_ASSET_REVISION = '20260914-motion-hotfix-v1';
@@ -495,16 +502,16 @@ let sideTransitionTimers = [];
 function updatePortfolioChrome() {
   const isTech = activePortfolioSide === 'tech';
   if (mainNav) mainNav.innerHTML = isTech ? techNavMarkup : creativeNavMarkup;
+  if (topNav) topNav.innerHTML = isTech ? techTopNavMarkup : creativeTopNavMarkup;
   const brand = document.querySelector('.brand-link');
   if (brand) {
     brand.textContent = isTech ? 'wveerie.sys' : 'wveerie.exe';
     brand.dataset.route = isTech ? '/tech' : '/home';
     brand.setAttribute('aria-label', isTech ? 'Return to technical portfolio home' : 'Return to creative portfolio home');
   }
-  const mobileBrand = document.querySelector('.mobile-brand');
-  if (mobileBrand) {
-    mobileBrand.dataset.route = isTech ? '/tech' : '/home';
-    mobileBrand.childNodes[0].textContent = isTech ? 'WVEERIE.SYS ' : 'WVEERIE ';
+  if (topBrand) {
+    topBrand.dataset.route = isTech ? '/tech' : '/home';
+    topBrand.childNodes[0].textContent = isTech ? 'WVEERIE.SYS ' : 'WVEERIE ';
   }
   const portrait = document.querySelector('.creative-profile-photo');
   const pixelAvatar = document.querySelector('.tech-profile-avatar');
@@ -512,11 +519,11 @@ function updatePortfolioChrome() {
   if (pixelAvatar) pixelAvatar.hidden = !isTech;
   const profileRole = document.querySelector('#profile-chip-role');
   if (profileRole) profileRole.textContent = isTech ? 'IT RECRUITER / LEFT HEMISPHERE' : 'MODEL / RIGHT HEMISPHERE';
-  const toggle = document.querySelector('[data-side-toggle]');
-  if (toggle) {
+  document.querySelectorAll('[data-side-toggle]').forEach((toggle) => {
     toggle.setAttribute('aria-label', isTech ? 'Switch to the creative portfolio' : 'Switch to the technical portfolio');
-    toggle.innerHTML = isTech ? '<span>♡ MODEL PORTFOLIO</span><b>R</b>' : '<span>⌘ TECH PORTFOLIO</span><b>L</b>';
-  }
+    if (toggle === topSideSwitch) toggle.textContent = isTech ? '♡ CREATIVE SIDE ↗' : '⌘ TECH SIDE ↗';
+    else toggle.innerHTML = isTech ? '<span>♡ MODEL PORTFOLIO</span><b>R</b>' : '<span>⌘ TECH PORTFOLIO</span><b>L</b>';
+  });
 }
 
 function applyPortfolioSide(side = activePortfolioSide, { persist = true } = {}) {
@@ -607,8 +614,34 @@ function syncPageInert() {
     || hasOpenPanel
     || (scanLightbox && !scanLightbox.hidden),
   );
+  const menuOpen = Boolean(sidebar?.classList.contains('open'));
   appShell?.toggleAttribute('inert', blocked);
-  cornerActions?.toggleAttribute('inert', blocked);
+  view?.toggleAttribute('inert', blocked || menuOpen);
+  cornerActions?.toggleAttribute('inert', blocked || menuOpen);
+  skipContentLink?.toggleAttribute('inert', blocked || menuOpen);
+  topNav?.toggleAttribute('inert', menuOpen);
+  topSideSwitch?.toggleAttribute('inert', menuOpen);
+  topBrand?.toggleAttribute('inert', menuOpen);
+}
+
+function trapFocus(event, container, extra = []) {
+  if (event.key !== 'Tab' || !container || container.hidden) return false;
+  const focusable = [...container.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'), ...extra]
+    .filter((element) => element && !element.hidden && !element.closest('[hidden], [inert]') && element.getClientRects().length);
+  if (!focusable.length) return false;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (!focusable.includes(document.activeElement)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus();
+  } else if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+  return true;
 }
 
 function restoreFocus(target) {
@@ -701,16 +734,17 @@ function renderTechPortfolio() {
           <div class="tech-availability"><i></i> OPEN TO IT RECRUITING OPPORTUNITIES</div>
           <h1>HUMAN<br /><span>+</span> SYSTEMS</h1>
           <p class="tech-deck">I’m Aurora — an IT recruiter with a strong interest in technology who enjoys translating between people, products, and systems.</p>
+          <p class="site-purpose">This is a personal introduction to my work and interests, not a substitute for a role-specific résumé. For an application, please ask me for a tailored résumé.</p>
           <div class="tech-actions">
-            <button class="tech-button primary" type="button" data-route="/tech/about">ABOUT MY APPROACH</button>
-            <button class="tech-button" type="button" data-route="/tech/experience">EXPLORE EXPERIENCE</button>
-            <a class="tech-button" href="mailto:avrora.maximova@gmail.com">SEND A SIGNAL ↗</a>
+            <button class="tech-button primary" type="button" data-route="/tech/experience">VIEW WORK EXPERIENCE</button>
+            <button class="tech-button" type="button" data-route="/tech/about">ABOUT MY APPROACH</button>
+            <a class="tech-button" href="mailto:avrora.maximova@gmail.com?subject=Tailored%20r%C3%A9sum%C3%A9%20request">REQUEST RÉSUMÉ ↗</a>
           </div>
           <dl class="tech-facts">
-            <div><dt>BASE</dt><dd>Russia, RUSSIA</dd></div>
+            <div><dt>WORK MODE</dt><dd>REMOTE / HYBRID / ONSITE</dd></div>
             <div><dt>FOCUS</dt><dd>IT RECRUITING</dd></div>
             <div><dt>LANGUAGE</dt><dd>ENGLISH C1</dd></div>
-            <div><dt>MODE</dt><dd>REMOTE / HYBRID / ONSITE</dd></div>
+            <div><dt>PROFILE</dt><dd>PEOPLE + SYSTEMS</dd></div>
           </dl>
         </div>
         <div class="tech-console" aria-label="Aurora's technical profile summary">
@@ -747,7 +781,7 @@ function renderTechPortfolio() {
       <section class="tech-section" id="tech-experience">
         <div class="tech-section-head"><p>02 / WORK LOG</p><h2>EXPERIENCE</h2><span>People-first work, organized like a system.</span></div>
         <div class="tech-timeline">
-          ${experience.map((item, index) => `<article class="tech-log-card"><span class="tech-log-index">${String(index + 1).padStart(2, '0')}</span><div class="tech-log-period">${item.period}</div><div><p>${item.company}</p><h3>${item.role}</h3><span>${item.copy}</span><b>${item.signal}</b></div></article>`).join('')}
+          ${experience.map((item, index) => `<article class="tech-log-card"><span class="tech-log-index">${String(index + 1).padStart(2, '0')}</span><div class="tech-log-period"><span class="tech-log-label">DATES</span><strong>${item.period}</strong></div><div><p class="tech-log-company"><span class="tech-log-label">ORGANIZATION / FORMAT</span><strong>${item.company}</strong></p><h3>${item.role}</h3><span>${item.copy}</span><b>${item.signal}</b></div></article>`).join('')}
         </div>
       </section>
 
@@ -810,23 +844,39 @@ function prepareSmoothPhoto(image, { replay = false, source } = {}) {
   if (!replay) image.dataset.photoLoadBound = 'true';
   const token = String(++smoothPhotoLoadToken);
   let settled = false;
+  let revealed = false;
+  let decodeFallbackTimer = 0;
   image.dataset.photoLoadToken = token;
   image.classList.remove('photo-loaded');
   image.classList.add('photo-loading');
 
+  const revealImage = () => {
+    if (revealed || image.dataset.photoLoadToken !== token) return;
+    revealed = true;
+    clearTimeout(decodeFallbackTimer);
+    image.classList.remove('photo-loading');
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) image.classList.add('photo-loaded');
+  };
+
   const reveal = () => {
     if (settled || image.dataset.photoLoadToken !== token) return;
     settled = true;
-    const decoded = typeof image.decode === 'function' ? image.decode().catch(() => {}) : Promise.resolve();
-    decoded.then(() => requestAnimationFrame(() => {
-      if (image.dataset.photoLoadToken !== token) return;
-      image.classList.remove('photo-loading');
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) image.classList.add('photo-loaded');
-    }));
+    decodeFallbackTimer = setTimeout(revealImage, 1600);
+    let decoded;
+    try {
+      decoded = typeof image.decode === 'function' ? Promise.resolve(image.decode()).catch(() => {}) : Promise.resolve();
+    } catch {
+      decoded = Promise.resolve();
+    }
+    decoded.then(() => {
+      if (typeof requestAnimationFrame === 'function') requestAnimationFrame(revealImage);
+      else revealImage();
+    });
   };
   const revealError = () => {
     if (settled || image.dataset.photoLoadToken !== token) return;
     settled = true;
+    clearTimeout(decodeFallbackTimer);
     image.classList.remove('photo-loading', 'photo-loaded');
   };
 
@@ -886,10 +936,11 @@ function renderHome() {
           <h1><button class="hero-title" type="button" data-route="/home">WVEERIE</button></h1>
           <p class="hero-name">AURORA MAXIMOVA</p>
           <p class="hero-role">MODEL / ARTIST / CREATIVE</p>
+          <p class="site-purpose">A personal archive for people who want to get to know me, my images and my ideas. For applications, I share a separate résumé tailored to the role.</p>
           <div class="hero-progress"><span>${shoots.length} SERIES SYNCED</span><div><i></i></div></div>
-          <div class="action-row">
+          <div class="action-row quick-actions">
             <button class="game-button primary" type="button" data-route="/portfolio">VIEW PORTFOLIO</button>
-            <button class="game-button" type="button" data-route="/snaps">MODEL SNAPS</button>
+            <button class="game-button" type="button" data-panel="contact">SKIP TO CONTACT</button>
           </div>
           <div class="mini-stats">
             <div><span>HEIGHT</span><strong>160 CM</strong></div>
@@ -1042,6 +1093,12 @@ function destinationForSide(side) {
 }
 
 function navigate(route) {
+  if (route === '/home') {
+    const homeUrl = `${location.pathname}${location.search}`;
+    if (location.hash) history.pushState(null, '', homeUrl);
+    renderRoute();
+    return;
+  }
   const target = `#${route}`;
   if (location.hash === target) renderRoute();
   else location.hash = target;
@@ -1050,12 +1107,20 @@ function navigate(route) {
 function setActiveNav(path) {
   const activeRoute = path.startsWith('/shoot/') ? '/portfolio' : path;
   document.querySelectorAll('[data-route]').forEach((button) => {
-    button.classList.toggle('active', button.dataset.route === activeRoute);
+    const isActive = button.dataset.route === activeRoute;
+    button.classList.toggle('active', isActive);
+    if (button.closest('.main-nav, .top-nav') && isActive) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
   });
 }
 
+let routeRenderCount = 0;
+let lastRenderedLocation = '';
 function renderRoute() {
   const path = currentPath();
+  if (path === '/home' && location.hash === '#/home') {
+    history.replaceState(null, '', `${location.pathname}${location.search}`);
+  }
   const routeSide = path.startsWith('/tech') ? 'tech' : 'creative';
   if (!isKnownRoute(path, routeSide)) {
     navigate(path.startsWith('/shoot/') ? '/portfolio' : routeSide === 'tech' ? '/tech' : '/home');
@@ -1081,6 +1146,25 @@ function renderRoute() {
   initReveals();
   recordAction('visit', path.startsWith('/shoot/') ? '/portfolio' : path);
   if (path.startsWith('/shoot/')) recordAction('series', path.split('/')[2]);
+  const sectionNames = {
+    '/home': 'Creative home', '/portfolio': 'Portfolio', '/artwork': 'Artwork', '/snaps': 'Model snaps',
+    '/projects': 'Projects', '/tech': 'Technical home', '/tech/about': 'Technical about me',
+    '/tech/experience': 'Work experience', '/tech/skills': 'Technical skills',
+    '/tech/education': 'Education', '/tech/contact': 'Technical contact',
+  };
+  const routeName = path.startsWith('/shoot/')
+    ? `${shoots.find((shoot) => shoot.slug === path.split('/')[2])?.title || 'Photo series'} photo series`
+    : sectionNames[path] || 'Portfolio';
+  if (routeStatus) routeStatus.textContent = `${routeName} loaded.`;
+  const shouldFocusContent = routeRenderCount > 0 && !appShell?.inert;
+  routeRenderCount += 1;
+  lastRenderedLocation = location.href;
+  if (shouldFocusContent) {
+    const section = path.startsWith('/tech/') ? document.querySelector(`#tech-${path.split('/')[2]}`) : null;
+    const heading = section?.querySelector('h2') || view.querySelector('h1') || view;
+    heading.setAttribute('tabindex', '-1');
+    requestAnimationFrame(() => heading.focus({ preventScroll: true }));
+  }
   if (path.startsWith('/tech/')) {
     const target = document.querySelector(`#tech-${path.split('/')[2]}`);
     const scrollToTarget = () => target?.scrollIntoView({ behavior: 'instant', block: 'start' });
@@ -1101,38 +1185,49 @@ function initReveals() {
     targets.forEach((item) => item.classList.add('is-visible'));
     return;
   }
-  revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.08, rootMargin: '0px 0px -35px' });
-  targets.forEach((item) => revealObserver.observe(item));
+  if (typeof IntersectionObserver !== 'function') {
+    targets.forEach((item) => item.classList.add('is-visible'));
+    return;
+  }
+  try {
+    revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -35px' });
+    targets.forEach((item) => revealObserver.observe(item));
+  } catch {
+    revealObserver?.disconnect();
+    targets.forEach((item) => item.classList.add('is-visible'));
+  }
 }
 
 function openMenu() {
-  if (!mobileNavigationQuery.matches) return;
   sidebar.classList.add('open');
   document.body.classList.add('menu-open');
   sidebar.inert = false;
   sidebar.removeAttribute('aria-hidden');
   menuToggle?.setAttribute('aria-expanded', 'true');
+  menuToggle?.setAttribute('aria-label', 'Close main menu');
+  if (menuToggle) menuToggle.textContent = 'CLOSE MENU ×';
+  syncPageInert();
+  sidebar.querySelector('.main-nav [data-route]')?.focus({ preventScroll: true });
 }
 
 function closeMenu() {
+  const focusWasInside = sidebar.contains(document.activeElement);
   sidebar.classList.remove('open');
   document.body.classList.remove('menu-open');
   menuToggle?.setAttribute('aria-expanded', 'false');
-  if (mobileNavigationQuery.matches) {
-    if (sidebar.contains(document.activeElement)) menuToggle?.focus({ preventScroll: true });
-    sidebar.inert = true;
-    sidebar.setAttribute('aria-hidden', 'true');
-  } else {
-    sidebar.inert = false;
-    sidebar.removeAttribute('aria-hidden');
-  }
+  menuToggle?.setAttribute('aria-label', 'Open main menu');
+  if (menuToggle) menuToggle.textContent = 'OPEN MENU +';
+  sidebar.inert = true;
+  sidebar.setAttribute('aria-hidden', 'true');
+  if (focusWasInside) menuToggle?.focus({ preventScroll: true });
+  syncPageInert();
 }
 
 mobileNavigationQuery.addEventListener?.('change', () => closeMenu());
@@ -1141,7 +1236,7 @@ closeMenu();
 function openPanel(name) {
   const panels = { about: aboutPanel, contact: contactPanel, quests: questPanel };
   const panel = panels[name] || contactPanel;
-  panelFocusReturnTarget = document.activeElement;
+  panelFocusReturnTarget = sidebar.classList.contains('open') ? menuToggle : document.activeElement;
   hideToast(true);
   Object.values(panels).forEach((item) => { item.hidden = item !== panel; });
   backdrop.hidden = false;
@@ -1563,18 +1658,22 @@ function setIntroFrame(image, frames, elapsed, duration, once = false) {
     && introMode === 'idle'
     && previousSource?.includes('/ronia/idle/')
     && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (ghost && previousSource && previousSource !== nextSource && shouldBlendIdle) {
+  if (ghost && previousSource && previousSource !== nextSource && shouldBlendIdle && typeof ghost.animate === 'function') {
     introSpriteFades.get(ghost)?.cancel();
     ghost.src = previousSource;
-    const fade = ghost.animate(
-      [{ opacity: .12 }, { opacity: 0 }],
-      {
-        duration: 78,
-        easing: 'linear',
-        fill: 'forwards',
-      },
-    );
-    introSpriteFades.set(ghost, fade);
+    try {
+      const fade = ghost.animate(
+        [{ opacity: .12 }, { opacity: 0 }],
+        {
+          duration: 78,
+          easing: 'linear',
+          fill: 'forwards',
+        },
+      );
+      introSpriteFades.set(ghost, fade);
+    } catch {
+      ghost.style.opacity = '0';
+    }
   } else if (ghost) {
     introSpriteFades.get(ghost)?.cancel();
   }
@@ -1620,7 +1719,11 @@ function setIntroMode(mode) {
     [introRonia, introCats, introPetScene].forEach((image) => { image.dataset.frame = ''; });
     introSpriteGhosts.forEach((ghost) => {
       introSpriteFades.get(ghost)?.cancel();
-      ghost.getAnimations().forEach((animation) => animation.cancel());
+      try {
+        if (typeof ghost.getAnimations === 'function') ghost.getAnimations().forEach((animation) => animation.cancel());
+      } catch {
+        // Sprite blending is decorative; the character frame itself stays available.
+      }
     });
   }
 }
@@ -1743,10 +1846,18 @@ function showSideSelect() {
   sideSelect.classList.remove('is-leaving');
   document.body.classList.add('side-select-open');
   syncPageInert();
-  requestAnimationFrame(() => {
+  let revealed = false;
+  const revealChooser = () => {
+    if (revealed || sideSelect.hidden) return;
+    revealed = true;
     sideSelect.classList.add('is-visible');
-    sideSelect.focus({ preventScroll: true });
-  });
+  };
+  try {
+    requestAnimationFrame(revealChooser);
+    setTimeout(revealChooser, 80);
+  } catch {
+    revealChooser();
+  }
 }
 
 function choosePortfolioSide(side) {
@@ -1783,7 +1894,9 @@ function completeIntro() {
     introCats.style.removeProperty('bottom');
     document.querySelector('[data-intro-enter] strong').textContent = 'ENTER THE ARCHIVE';
     syncPageInert();
-    if (!shouldChooseSide) {
+    if (shouldChooseSide) {
+      sideSelect?.focus({ preventScroll: true });
+    } else {
       view.focus({ preventScroll: true });
       showToast('Welcome back. Your selected side is still connected ♡');
     }
@@ -1850,8 +1963,6 @@ function initRoniaIntro() {
   runnerNextIdleActionAt = runnerLastActionAt + 4800;
   setIntroWorldPosition(0);
   updateRunnerHud();
-  document.body.classList.add('intro-open');
-  syncPageInert();
   roniaIntro.dataset.mode = 'run';
   roniaIntro.dataset.session = 'prologue';
   [introRonia, introCats, introPetScene].forEach((image) => { image.hidden = false; });
@@ -1866,6 +1977,14 @@ function initRoniaIntro() {
   });
   roniaIntro.addEventListener('click', (event) => {
     if (event.target.closest('[data-run-control]')) return;
+    if (event.target.closest('[data-intro-quick]')) {
+      enterFromIntro({ skip: true });
+      return;
+    }
+    if (event.target.closest('[data-intro-story]')) {
+      startRunnerGame();
+      return;
+    }
     if (event.target.closest('[data-intro-music]')) {
       toggleIntroMusic();
       return;
@@ -1878,12 +1997,14 @@ function initRoniaIntro() {
       enterFromIntro({ skip: Boolean(event.target.closest('[data-intro-skip]')) });
       return;
     }
-    if (introPrologueActive) {
-      enterFromIntro();
-      return;
-    }
+    if (introPrologueActive) return;
   });
-  requestAnimationFrame(() => document.querySelector('[data-intro-enter]')?.focus({ preventScroll: true }));
+  // Keep the static portfolio readable until the interactive intro is fully wired.
+  roniaIntro.hidden = false;
+  roniaIntro.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('intro-open');
+  syncPageInert();
+  requestAnimationFrame(() => document.querySelector('[data-intro-quick]')?.focus({ preventScroll: true }));
   if (!document.hidden) introFrameRequest = requestAnimationFrame(animateIntro);
 }
 
@@ -1970,6 +2091,7 @@ document.addEventListener('click', (event) => {
     sparkle.style.top = `${event.clientY}px`;
     document.body.append(sparkle);
     sparkle.addEventListener('animationend', () => sparkle.remove(), { once: true });
+    window.setTimeout(() => sparkle.remove(), 1200);
   }
 });
 
@@ -1988,10 +2110,15 @@ sideSelect?.querySelectorAll('[data-choose-side]').forEach((button) => {
 
 menuToggle?.addEventListener('click', () => sidebar.classList.contains('open') ? closeMenu() : openMenu());
 document.querySelector('#toast-close').addEventListener('click', () => hideToast());
-window.addEventListener('hashchange', renderRoute);
+const renderAfterHistoryChange = () => {
+  if (location.href !== lastRenderedLocation) renderRoute();
+};
+window.addEventListener('hashchange', renderAfterHistoryChange);
+window.addEventListener('popstate', renderAfterHistoryChange);
 
 document.addEventListener('keydown', (event) => {
-  if (sideSelect && !sideSelect.hidden) {
+  if (sideSelect && !sideSelect.hidden && (!roniaIntro || roniaIntro.hidden)) {
+    if (event.key === 'Tab') trapFocus(event, sideSelect);
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
       event.preventDefault();
       const side = event.key === 'ArrowLeft' ? 'tech' : 'creative';
@@ -2000,11 +2127,15 @@ document.addEventListener('keydown', (event) => {
     return;
   }
   if (roniaIntro && !roniaIntro.hidden) {
+    if (event.key === 'Tab') {
+      trapFocus(event, roniaIntro);
+      return;
+    }
     if (event.target.closest('button') && ['Enter', ' '].includes(event.key)) return;
     if (introPrologueActive) {
       if (['Enter', ' ', 'Escape'].includes(event.key)) {
         event.preventDefault();
-        enterFromIntro({ skip: event.key === 'Escape' });
+        enterFromIntro({ skip: true });
       }
       return;
     }
@@ -2037,15 +2168,22 @@ document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') enterFromIntro({ skip: true });
     return;
   }
+  const visiblePanel = [aboutPanel, contactPanel, questPanel].find((panel) => panel && !panel.hidden);
+  if (event.key === 'Tab') {
+    if (!scanLightbox.hidden) trapFocus(event, scanLightbox);
+    else if (visiblePanel) trapFocus(event, visiblePanel);
+    else if (sidebar.classList.contains('open')) trapFocus(event, sidebar, [menuToggle]);
+    return;
+  }
   if (event.key === 'Escape') {
     closePanels();
     closeMedia();
     closeMenu();
   }
-  if (!scanLightbox.hidden && event.key === 'ArrowLeft') { activeMediaIndex -= 1; showActiveMedia(); }
-  if (!scanLightbox.hidden && event.key === 'ArrowRight') { activeMediaIndex += 1; showActiveMedia(); }
-  if (scanLightbox.hidden && !['INPUT', 'TEXTAREA'].includes(event.target.tagName) && event.key.toLowerCase() === 'q') openPanel('quests');
-  if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName) && event.key.toLowerCase() === 'm') sidebar.classList.contains('open') ? closeMenu() : openMenu();
+  if (!scanLightbox.hidden && event.key === 'ArrowLeft') { event.preventDefault(); activeMediaIndex -= 1; showActiveMedia(); }
+  if (!scanLightbox.hidden && event.key === 'ArrowRight') { event.preventDefault(); activeMediaIndex += 1; showActiveMedia(); }
+  if (!visiblePanel && scanLightbox.hidden && !['INPUT', 'TEXTAREA'].includes(event.target.tagName) && event.key.toLowerCase() === 'q') openPanel('quests');
+  if (!visiblePanel && scanLightbox.hidden && !['INPUT', 'TEXTAREA'].includes(event.target.tagName) && event.key.toLowerCase() === 'm') sidebar.classList.contains('open') ? closeMenu() : openMenu();
 });
 
 document.addEventListener('keyup', (event) => {
@@ -2111,5 +2249,20 @@ document.querySelector('.brand-link').addEventListener('click', () => {
 initSmoothPhotoLoading(document);
 applyPortfolioSide(activePortfolioSide, { persist: false });
 updateGameUI();
-if (roniaIntro) initRoniaIntro();
-else renderRoute();
+const staticFallbackMarkup = view.innerHTML;
+const hadDirectRouteHash = location.hash.startsWith('#/');
+try {
+  renderRoute();
+  // A shared deep link is already an intentional archive choice, so open it directly.
+  if (roniaIntro && !hadDirectRouteHash) initRoniaIntro();
+} catch (error) {
+  console.error('Interactive portfolio failed to start; the static profile remains available.', error);
+  view.innerHTML = staticFallbackMarkup;
+  if (roniaIntro) roniaIntro.hidden = true;
+  if (sideSelect) sideSelect.hidden = true;
+  document.body.classList.remove('intro-open', 'side-select-open', 'side-transitioning');
+  appShell?.removeAttribute('inert');
+  view.removeAttribute('inert');
+  cornerActions?.removeAttribute('inert');
+  skipContentLink?.removeAttribute('inert');
+}
