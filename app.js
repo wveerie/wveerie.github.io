@@ -24,8 +24,8 @@ const sideTransition = document.querySelector('#side-transition');
 const sideTransitionKicker = document.querySelector('#side-transition-kicker');
 const sideTransitionTitle = document.querySelector('#side-transition-title');
 const introRonia = document.querySelector('#intro-ronia');
-const introCats = document.querySelector('#intro-cats');
-const introPetScene = document.querySelector('#intro-pet-scene');
+const introTechLens = document.querySelector('[data-intro-tech-lens]');
+const introBunnyLabel = document.querySelector('.intro-bunny-label span');
 const introSpriteGhosts = new Map(
   [...document.querySelectorAll('[data-ghost-for]')].map((ghost) => [ghost.dataset.ghostFor, ghost]),
 );
@@ -87,19 +87,12 @@ const introAnimations = {
   run: spriteFrames('assets/game/v3/sprites/ronia/run', 8),
   idle: spriteFrames('assets/game/v3/sprites/ronia/idle', 8),
   jump: spriteFrames('assets/game/v3/sprites/ronia/jump', 8),
-  catsRun: spriteFrames('assets/game/v3/sprites/cats/run', 10),
-  catsJump: spriteFrames('assets/game/v3/sprites/cats/jump', 8),
-  catsIdle: spriteFrames('assets/game/v3/sprites/cats/idle', 10),
-  petScene: spriteFrames('assets/game/v3/sprites/pet-scene', 10),
 };
 
 const INTRO_TIMING = Object.freeze({
   run: 100,
-  catsRun: 100,
   jump: 118,
   idle: 150,
-  catsIdle: 155,
-  pet: 160,
   jumpDuration: 960,
 });
 
@@ -123,14 +116,10 @@ function preloadIntroFrame(source, priority = 'low') {
 
 const criticalIntroFrames = [
   ...introAnimations.run,
-  ...introAnimations.catsRun,
   ...introAnimations.jump,
-  ...introAnimations.catsJump,
 ];
 const deferredIntroFrames = [
   ...introAnimations.idle,
-  ...introAnimations.catsIdle,
-  ...introAnimations.petScene,
 ];
 [...new Set(criticalIntroFrames)].forEach((source) => preloadIntroFrame(source, 'high'));
 const preloadDeferredIntroFrames = () => {
@@ -1365,9 +1354,6 @@ let runnerQueuedJumpUntil = 0;
 let runnerQueuedJumpAutoStop = false;
 let runnerDuckHeld = false;
 let runnerLastActionAt = 0;
-let runnerIdleAction = null;
-let runnerNextIdleActionAt = 0;
-let runnerIdleSequence = 0;
 let runnerEntities = [];
 let runnerHudSnapshot = '';
 let currentWorldDistance = 0;
@@ -1530,7 +1516,6 @@ function finishRunnerJump(now = performance.now()) {
   runnerQueuedJumpAutoStop = false;
   introRonia.classList.remove('runner-airborne');
   introRonia.style.removeProperty('bottom');
-  introCats.style.removeProperty('bottom');
   if (shouldChainJump) {
     jumpRunner({ autoStop: chainedAutoStop });
     return;
@@ -1575,7 +1560,6 @@ function endRunnerGame() {
   runnerQueuedJumpAutoStop = false;
   introRonia.classList.remove('runner-airborne');
   introRonia.style.removeProperty('bottom');
-  introCats.style.removeProperty('bottom');
   saveRunnerBest();
   updateRunnerHud();
   introFinalScore.textContent = formatRunnerScore(runnerScore);
@@ -1603,9 +1587,7 @@ function startRunnerGame({ moving = false } = {}) {
   runnerQueuedJumpUntil = 0;
   runnerQueuedJumpAutoStop = false;
   runnerDuckHeld = false;
-  runnerIdleAction = null;
   introRonia.style.removeProperty('bottom');
-  introCats.style.removeProperty('bottom');
   introGameActive = true;
   introPrologueActive = false;
   introIsExiting = false;
@@ -1614,7 +1596,6 @@ function startRunnerGame({ moving = false } = {}) {
   runnerLastFrameAt = now;
   runnerSpawnDistance = 720;
   runnerLastActionAt = now;
-  runnerNextIdleActionAt = now + 4800;
   setIntroWorldPosition(0);
   introGameover.hidden = true;
   roniaIntro.classList.remove('is-hidden', 'is-ending', 'is-jumping', 'runner-hit', 'game-over');
@@ -1626,7 +1607,10 @@ function startRunnerGame({ moving = false } = {}) {
   document.body.classList.add('intro-open');
   syncPageInert();
   document.querySelector('[data-intro-enter] strong').textContent = 'EXIT TO THE ARCHIVE';
-  introHint.textContent = 'HOLD → TO RUN · SPACE / ↑ TO JUMP · ↓ TO DUCK · ← TO STOP';
+  if (introBunnyLabel) introBunnyLabel.textContent = roniaIntro.dataset.lens === 'tech'
+    ? 'palette preview · Ronia runs'
+    : 'concept art · Ronia runs';
+  introHint.textContent = 'HOLD → TO RUN · SPACE / ↑ TO JUMP · ↓ TO DUCK · ◈ TECH LENS PREVIEWS THE OTHER PATH';
   setIntroMode(moving ? 'run' : 'idle');
   updateRunnerHud();
   cancelAnimationFrame(introFrameRequest);
@@ -1683,8 +1667,6 @@ function setIntroFrame(image, frames, elapsed, duration, once = false) {
 
 function markRunnerAction(now = performance.now()) {
   runnerLastActionAt = now;
-  runnerIdleAction = null;
-  runnerNextIdleActionAt = now + 4800;
 }
 
 function setRunnerMoving(moving) {
@@ -1698,25 +1680,14 @@ function setRunnerMoving(moving) {
     : 'PAUSED — HOLD → TO RUN · everyone waits when you wait ♡';
 }
 
-function beginRunnerIdleAction(now) {
-  runnerIdleAction = {
-    type: 'pet',
-    startedAt: now,
-    duration: 3600,
-  };
-  runnerIdleSequence += 1;
-}
-
 function setIntroMode(mode) {
   if (!roniaIntro) return;
   const changed = introMode !== mode || roniaIntro.dataset.mode !== mode;
   introMode = mode;
   roniaIntro.dataset.mode = mode;
   introRonia.hidden = false;
-  introCats.hidden = false;
-  introPetScene.hidden = false;
   if (changed) {
-    [introRonia, introCats, introPetScene].forEach((image) => { image.dataset.frame = ''; });
+    introRonia.dataset.frame = '';
     introSpriteGhosts.forEach((ghost) => {
       introSpriteFades.get(ghost)?.cancel();
       try {
@@ -1730,26 +1701,9 @@ function setIntroMode(mode) {
 
 function animateRunnerIdle(now) {
   if (!runnerLastActionAt) runnerLastActionAt = now;
-  if (!runnerNextIdleActionAt) runnerNextIdleActionAt = now + 4800;
-  if (!runnerIdleAction && now >= runnerNextIdleActionAt) beginRunnerIdleAction(now);
-
-  if (runnerIdleAction) {
-    const phase = now - runnerIdleAction.startedAt;
-    if (phase >= runnerIdleAction.duration) {
-      runnerIdleAction = null;
-      runnerLastActionAt = now;
-      runnerNextIdleActionAt = now + 5600 + Math.random() * 1900;
-    } else {
-      setIntroMode('pet');
-      setIntroFrame(introPetScene, introAnimations.petScene, phase, INTRO_TIMING.pet);
-      return;
-    }
-  }
-
   const idleElapsed = now - runnerLastActionAt;
   setIntroMode('idle');
   setIntroFrame(introRonia, introAnimations.idle, idleElapsed, INTRO_TIMING.idle);
-  setIntroFrame(introCats, introAnimations.catsIdle, idleElapsed + 37, INTRO_TIMING.catsIdle);
 }
 
 function animateIntro(now) {
@@ -1764,9 +1718,7 @@ function animateIntro(now) {
     const exitArc = 4 * exitProgress * (1 - exitProgress);
     setIntroMode('jump');
     introRonia.style.bottom = `${16.5 + exitArc * 24}%`;
-    introCats.style.bottom = `${18.2 + exitArc * 24}%`;
     setIntroFrame(introRonia, introAnimations.jump, jumpElapsed, INTRO_TIMING.jump, true);
-    setIntroFrame(introCats, introAnimations.catsJump, jumpElapsed, INTRO_TIMING.jump, true);
   } else if (introGameActive) {
     if (runnerPlaying) {
       if (runnerIsAirborne && now - runnerJumpStartedAt >= INTRO_TIMING.jumpDuration) finishRunnerJump(now);
@@ -1776,24 +1728,17 @@ function animateIntro(now) {
         const jumpProgress = Math.min(1, Math.max(0, (now - runnerJumpStartedAt) / INTRO_TIMING.jumpDuration));
         const jumpArc = 4 * jumpProgress * (1 - jumpProgress);
         introRonia.style.bottom = `${16.5 + jumpArc * 24.5}%`;
-        introCats.style.bottom = `${18.2 + jumpArc * 24.5}%`;
         setIntroFrame(introRonia, introAnimations.jump, now - runnerJumpStartedAt, INTRO_TIMING.jump, true);
-        setIntroFrame(introCats, introAnimations.catsJump, now - runnerJumpStartedAt, INTRO_TIMING.jump, true);
       } else if (runnerDuckHeld) {
         introRonia.style.removeProperty('bottom');
-        introCats.style.removeProperty('bottom');
         setIntroMode('duck');
         setIntroFrame(introRonia, introAnimations.jump, 0, 100, true);
-        setIntroFrame(introCats, runnerMoving ? introAnimations.catsRun : introAnimations.catsIdle, runnerMoving ? runnerDistance * 3.4 : now, 90);
       } else if (runnerMoving) {
         introRonia.style.removeProperty('bottom');
-        introCats.style.removeProperty('bottom');
         setIntroMode('run');
         setIntroFrame(introRonia, introAnimations.run, runnerDistance * 3.4, INTRO_TIMING.run);
-        setIntroFrame(introCats, introAnimations.catsRun, runnerDistance * 3.4 + 32, INTRO_TIMING.catsRun);
       } else {
         introRonia.style.removeProperty('bottom');
-        introCats.style.removeProperty('bottom');
         animateRunnerIdle(now);
       }
     } else {
@@ -1809,15 +1754,11 @@ function animateIntro(now) {
       const arc = 4 * progress * (1 - progress);
       setIntroMode('jump');
       introRonia.style.bottom = `${16.5 + arc * 24}%`;
-      introCats.style.bottom = `${18.2 + arc * 24}%`;
       setIntroFrame(introRonia, introAnimations.jump, cycle - 2500, INTRO_TIMING.jump, true);
-      setIntroFrame(introCats, introAnimations.catsJump, cycle - 2500, INTRO_TIMING.jump, true);
     } else {
       introRonia.style.removeProperty('bottom');
-      introCats.style.removeProperty('bottom');
       setIntroMode('run');
       setIntroFrame(introRonia, introAnimations.run, elapsed, INTRO_TIMING.run);
-      setIntroFrame(introCats, introAnimations.catsRun, elapsed + 24, INTRO_TIMING.catsRun);
     }
   } else {
     animateRunnerIdle(now);
@@ -1891,7 +1832,6 @@ function completeIntro() {
     introGameover.hidden = true;
     roniaIntro.classList.remove('game-playing', 'world-moving', 'runner-hit', 'game-over');
     introRonia.style.removeProperty('bottom');
-    introCats.style.removeProperty('bottom');
     document.querySelector('[data-intro-enter] strong').textContent = 'ENTER THE ARCHIVE';
     syncPageInert();
     if (shouldChooseSide) {
@@ -1949,6 +1889,23 @@ async function toggleIntroMusic() {
   }
 }
 
+function toggleTechLens() {
+  if (!roniaIntro || !introTechLens || !introGameActive) return;
+  const techActive = roniaIntro.dataset.lens !== 'tech';
+  roniaIntro.dataset.lens = techActive ? 'tech' : 'creative';
+  introTechLens.setAttribute('aria-pressed', String(techActive));
+  introTechLens.textContent = techActive ? '♡ CREATIVE LENS' : '◈ TECH LENS';
+  introTechLens.setAttribute('aria-label', techActive
+    ? 'Return to the creative-side game palette'
+    : 'Preview the tech-side game palette');
+  if (introBunnyLabel) introBunnyLabel.textContent = techActive
+    ? 'palette preview · Ronia runs'
+    : 'concept art · Ronia runs';
+  introHint.textContent = techActive
+    ? 'TECH WORLD PREVIEW — RONIA STILL RUNS; YOUR BUNNY SPRITES COME NEXT'
+    : 'CREATIVE WORLD — RONIA RUNS WITH HER TECH-SIDE BUNNY FRIEND';
+}
+
 function initRoniaIntro() {
   if (!roniaIntro) return;
   introReturnTarget = 'chooser';
@@ -1960,12 +1917,13 @@ function initRoniaIntro() {
   introPrologueActive = true;
   introStartedAt = performance.now();
   runnerLastActionAt = performance.now();
-  runnerNextIdleActionAt = runnerLastActionAt + 4800;
   setIntroWorldPosition(0);
   updateRunnerHud();
   roniaIntro.dataset.mode = 'run';
   roniaIntro.dataset.session = 'prologue';
-  [introRonia, introCats, introPetScene].forEach((image) => { image.hidden = false; });
+  roniaIntro.dataset.lens = 'creative';
+  introRonia.hidden = false;
+  if (introBunnyLabel) introBunnyLabel.textContent = 'concept sprite · your art next';
   roniaIntro.addEventListener('pointerdown', (event) => {
     if (!introGameActive || !runnerPlaying || introIsExiting) return;
     if (event.pointerType === 'mouse' && event.button !== 0) return;
@@ -1987,6 +1945,10 @@ function initRoniaIntro() {
     }
     if (event.target.closest('[data-intro-music]')) {
       toggleIntroMusic();
+      return;
+    }
+    if (event.target.closest('[data-intro-tech-lens]')) {
+      toggleTechLens();
       return;
     }
     if (event.target.closest('[data-intro-retry]')) {
@@ -2215,8 +2177,6 @@ document.addEventListener('visibilitychange', () => {
     if (introExitStartedAt) introExitStartedAt += pausedFor;
     if (runnerJumpStartedAt) runnerJumpStartedAt += pausedFor;
     if (runnerLastActionAt) runnerLastActionAt += pausedFor;
-    if (runnerNextIdleActionAt) runnerNextIdleActionAt += pausedFor;
-    if (runnerIdleAction?.startedAt) runnerIdleAction.startedAt += pausedFor;
   }
   introPausedAt = 0;
   runnerLastFrameAt = now;
@@ -2241,7 +2201,7 @@ let brandClicks = 0;
 document.querySelector('.brand-link').addEventListener('click', () => {
   brandClicks += 1;
   if (brandClicks === 5) {
-    showToast('Achievement unlocked: curious visitor cat ♡');
+    showToast('Achievement unlocked: curious visitor bunny ♡');
     brandClicks = 0;
   }
 });

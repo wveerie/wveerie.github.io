@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 120" shape-rendering="crispEdges" role="img" aria-label="Temporary pixel-style tech bunny concept">
+  <g fill="#172445">
+    <path d="M24 8h20v34H24zm28-4h20v38H52z"/>
+    <path d="M28 0h12v8H28zm28 0h12v4H56z"/>
+    <path d="M20 40h56v8h8v24h-8v12H20V72h-8V48h8z"/>
+    <path d="M26 84h48v6h8v18h-8v8H22v-8h-8V90h12z"/>
+    <path d="M14 94H6v16h8zm68 0h8v16h-8z"/>
+  </g>
+  <g fill="#48b7cb">
+    <path d="M30 12h8v28h-8zm28-4h8v32h-8z"/>
+    <path d="M20 49h56v25H20z"/>
+    <path d="M30 85h38v24H30z"/>
+    <path d="M12 98h6v12h-6zm66 0h6v12h-6z"/>
+  </g>
+  <g fill="#b686db">
+    <path d="M32 17h4v17h-4zm28-5h4v21h-4z"/>
+    <path d="M27 45h43v5H27zm-4 29h50v5H23z"/>
+    <path d="M36 89h24v5H36z"/>
+    <path d="M20 105h15v7H20zm41 0h15v7H61z"/>
+  </g>
+  <g fill="#0e355d">
+    <path d="M25 52h48v10H25z"/>
+    <path d="M35 82h27v18H35z"/>
+    <path d="M26 99h16v11H26zm28 0h16v11H54z"/>
+  </g>
+  <g fill="#81f6e6">
+    <path d="M30 51h37v3H30z"/>
+    <path d="M34 64h4v4h-4zm24 0h4v4h-4z"/>
+    <path d="M42 82h12v3H42zm-5 13h22v3H37z"/>
+    <path d="M20 105h11v3H20zm45 0h11v3H65z"/>
+    <path d="M4 43h9v4H4zm4-4h4v12H8z"/>
+  </g>
+  <g fill="#172445">
+    <path d="M31 60h7v7h-7zm27 0h7v7h-7z"/>
+    <path d="M42 70h13v4H42z"/>
+    <path d="M44 84h8v8h-8z"/>
+  </g>
+  <g fill="#eefeff">
+    <path d="M32 60h3v3h-3zm27 0h3v3h-3z"/>
+    <path d="M46 71h5v2h-5z"/>
+  </g>
+  <g fill="#4c3784">
+    <path d="M40 85h16v7H40z"/>
+    <path d="M39 105h18v5H39z"/>
+  </g>
+  <g fill="#81f6e6"><path d="M44 87h8v3h-8zm-2 19h12v2H42z"/></g>
+</svg>

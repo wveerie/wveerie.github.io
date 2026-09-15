@@ -77,18 +77,18 @@ body.intro-open { overflow: hidden; }
 .intro-stage { position: absolute; z-index: 6; inset: 0; pointer-events: none; }
 .intro-sprite { position: absolute; display: block; object-fit: contain; object-position: center bottom; image-rendering: pixelated; filter: drop-shadow(5px 7px 0 #30296566); transition: opacity .24s ease, filter .2s ease; will-change: opacity, transform; }
 .intro-sprite-ghost { opacity: 0; pointer-events: none; }
-.ronia-intro[data-mode="run"] .intro-ronia:not(.intro-sprite-ghost),
-.ronia-intro[data-mode="run"] .intro-cats:not(.intro-sprite-ghost) { filter: drop-shadow(5px 7px 0 #30296566); }
+.ronia-intro[data-mode="run"] .intro-ronia:not(.intro-sprite-ghost) { filter: drop-shadow(5px 7px 0 #30296566); }
 .intro-ronia { left: 32%; bottom: 16.5%; height: clamp(165px,28svh,302px); transform: translateX(-50%); transform-origin: 50% 100%; }
-.intro-cats { left: 7%; bottom: 18.2%; height: clamp(66px,10.2svh,108px); object-position: center bottom; transform-origin: 50% 100%; }
-.intro-pet-scene { left: 16%; bottom: 16.4%; height: clamp(125px,20svh,218px); opacity: 0; transform-origin: 50% 100%; }
+.intro-tech-bunny { left: 10%; bottom: 17%; height: clamp(112px,20svh,220px); object-position: center bottom; filter: drop-shadow(5px 7px 0 #17244588); transform-origin: 50% 100%; }
+.ronia-intro[data-mode="run"] .intro-tech-bunny { animation: bunnyCompanionHop 1s steps(4,end) infinite; }
+.intro-bunny-label { position: absolute; z-index: 8; left: 10%; bottom: calc(17% + clamp(112px,20svh,220px) + 6px); width: max-content; max-width: 34vw; margin: 0; padding: 7px 9px; border: 2px solid #81f6e6; color: #effffe; background: #172445dc; box-shadow: 3px 3px 0 #48b7cb; pointer-events: none; text-shadow: 1px 1px 0 #172445; }
+.intro-bunny-label strong { display: block; font-family: var(--pixel); font-size: 6px; white-space: nowrap; }
+.intro-bunny-label span { display: block; margin-top: 4px; font-size: 10px; font-weight: 700; line-height: 1.25; }
+.ronia-intro[data-session="game"] .intro-bunny-label { display: none; }
 .intro-greeting { position: absolute; z-index: 8; left: 32%; bottom: calc(16.5% + clamp(165px,28svh,302px) + 14px); width: min(330px,52vw); margin: 0; padding: 10px 13px; transform: translateX(-50%); border: 2px solid #fff7ff; color: #fff; background: #29245fe8; box-shadow: 4px 4px 0 #f087c2; font-size: 12px; font-weight: 800; line-height: 1.45; text-shadow: 1px 1px 0 #352d72; pointer-events: none; }
 .intro-greeting strong { display: block; margin-bottom: 4px; color: #ffc5e2; font-family: var(--pixel); font-size: 6px; letter-spacing: .08em; }
 .intro-greeting::after { content: ""; position: absolute; bottom: -10px; left: 28%; width: 13px; height: 13px; border-right: 2px solid #fff7ff; border-bottom: 2px solid #fff7ff; background: #29245f; transform: rotate(45deg); }
 .ronia-intro:not([data-session="prologue"]) .intro-greeting { display: none; }
-.ronia-intro[data-mode="pet"] .intro-ronia,
-.ronia-intro[data-mode="pet"] .intro-cats { opacity: 0; }
-.ronia-intro[data-mode="pet"] .intro-pet-scene { opacity: 1; }
 .ronia-intro[data-mode] .intro-sprite-ghost { opacity: 0; animation: none !important; }
 .intro-world { position: absolute; z-index: 3; inset: 0; overflow: hidden; }
 .intro-world::before { content: ""; position: absolute; z-index: 0; left: -400px; right: -400px; bottom: 0; height: 17.5%; opacity: .42; background-image: repeating-linear-gradient(90deg,#2e2868 0 54px,#44377e 54px 61px,#2e2868 61px 125px,#7253a3 125px 130px); background-position: 0 0; border-top: 4px solid #b8a5ff80; box-shadow: inset 0 10px 0 #30276185; transform: translate3d(var(--world-near-x),0,0); will-change: transform; }
@@ -114,12 +114,12 @@ body.intro-open { overflow: hidden; }
 .ronia-intro.game-playing[data-mode="run"] .intro-ronia,
 .ronia-intro.game-playing[data-mode="jump"] .intro-ronia { left: 32%; }
 .intro-ronia.runner-airborne { filter: drop-shadow(8px 14px 0 #3029654d); }
-.ronia-intro[data-mode="jump"] .intro-cats { filter: drop-shadow(7px 12px 0 #3029654d); }
 .ronia-intro.runner-hit::after { animation: runnerHit .48s steps(3,end); }
 .ronia-intro[data-session="prologue"] .intro-hud,
 .ronia-intro[data-session="prologue"] .intro-controls,
 .ronia-intro[data-session="prologue"] .intro-skip,
 .ronia-intro[data-session="prologue"] .intro-music,
+.ronia-intro[data-session="prologue"] .intro-tech-lens,
 .ronia-intro[data-session="prologue"] .intro-gameover { display: none !important; }
 .ronia-intro[data-session="prologue"] .intro-enter { display: none; }
 .intro-prologue-actions { position: absolute; z-index: 10; left: 50%; bottom: clamp(18px,3.2svh,40px); width: min(570px,calc(100% - 36px)); display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; transform: translateX(-50%); }
@@ -137,6 +137,18 @@ body.intro-open { overflow: hidden; }
 .intro-skip:hover, .intro-skip:focus-visible { outline: 3px solid #ffd3e9; outline-offset: 3px; transform: translate(-2px,-2px); }
 .intro-music { position: absolute; z-index: 10; top: clamp(58px,7vw,88px); left: clamp(18px,3vw,44px); padding: 9px 11px; border: 2px solid #fff; color: #fff; background: #4a438ec7; box-shadow: 3px 3px 0 #89a1e8; cursor: pointer; font-family: var(--pixel); font-size: 6px; }
 .intro-music:hover, .intro-music:focus-visible { outline: 3px solid #dbe3ff; outline-offset: 3px; transform: translate(-2px,-2px); }
+.intro-tech-lens { position: absolute; z-index: 10; top: clamp(58px,7vw,88px); right: clamp(18px,3vw,44px); min-height: 40px; padding: 9px 11px; border: 2px solid #81f6e6; color: #eaffff; background: #172445df; box-shadow: 3px 3px 0 #48b7cb; cursor: pointer; font-family: var(--pixel); font-size: 6px; }
+.intro-tech-lens:hover,.intro-tech-lens:focus-visible { outline: 3px solid #bcfff5; outline-offset: 3px; transform: translate(-2px,-2px); }
+.ronia-intro[data-lens="tech"] { background-color: #182742; }
+.ronia-intro[data-lens="tech"] .intro-city { filter: hue-rotate(-90deg) saturate(.9) brightness(.62); }
+.ronia-intro[data-lens="tech"] .intro-atmosphere { background: radial-gradient(circle at 50% 34%,#81f6e630 0,transparent 35%),linear-gradient(180deg,#0c6b7966 0,#102f4f70 55%,#07192bbb 100%); }
+.ronia-intro[data-lens="tech"] .intro-clouds { filter: hue-rotate(-90deg) saturate(.9) brightness(.85); }
+.ronia-intro[data-lens="tech"] .intro-world::before { background-image: repeating-linear-gradient(90deg,#143451 0 54px,#1e5571 54px 61px,#143451 61px 125px,#2a88a0 125px 130px); border-color: #81f6e680; }
+.ronia-intro[data-lens="tech"] .intro-world::after { background: repeating-linear-gradient(90deg,#81f6e6 0 13px,transparent 13px 37px,#6db3d7 37px 44px,transparent 44px 78px); }
+.ronia-intro[data-lens="tech"] .intro-tech-bunny { filter: drop-shadow(0 0 10px #81f6e6aa) drop-shadow(6px 7px 0 #172445); }
+.ronia-intro[data-lens="tech"] .intro-hud { text-shadow: 2px 2px 0 #0d2639; }
+.ronia-intro[data-lens="tech"] .intro-tech-lens { border-color: #ffc5e2; color: #ffe7f5; background: #65385b; box-shadow: 3px 3px 0 #f087c2; }
+.ronia-intro[data-lens="tech"] .intro-bunny-label { border-color: #b8fff4; box-shadow: 3px 3px 0 #81f6e6; }
 .intro-hint { position: absolute; z-index: 8; left: clamp(18px,3vw,44px); bottom: clamp(132px,15svh,158px); margin: 0; color: #fbeaff; font-size: clamp(10px,1vw,14px); font-weight: 900; text-shadow: 2px 2px 0 #423a7b; }
 .intro-gameover { position: absolute; z-index: 20; top: 50%; left: 50%; width: min(520px,calc(100% - 36px)); padding: 30px 24px; transform: translate(-50%,-50%); border: 3px solid #fff5ff; color: white; background: #29245fe8; box-shadow: 8px 8px 0 #f087c2,inset 0 0 0 5px #5951a6; text-align: center; backdrop-filter: blur(8px); animation: gameoverIn .28s steps(3,end) both; }
 .intro-gameover > span { color: #ffc5e2; font-family: var(--pixel); font-size: 7px; }
@@ -810,6 +822,7 @@ html[data-portfolio="tech"] .app-shell :is(button,a):focus-visible { outline-col
 @keyframes sparklePop { from { opacity: 1; transform: translate(-50%,-50%) scale(.6) rotate(0); } to { opacity: 0; transform: translate(-50%,-115%) scale(1.35) rotate(18deg); } }
 @keyframes savePulse { 50% { opacity: .35; transform: scale(.8); } }
 @keyframes introFloat { 50% { transform: translateY(-13px) rotate(6deg); } }
+@keyframes bunnyCompanionHop { 0%,100% { translate: 0 0; } 42% { translate: 0 -7px; } }
 @keyframes cloudsBreathe { from { transform: translate3d(-2.5%,0,0) scale(1.01); } to { transform: translate3d(2.5%,8px,0) scale(1.035); } }
 @keyframes cloudsBreatheFar { from { transform: translate3d(-1.5%,4px,0) scaleX(-1); } to { transform: translate3d(2%,0,0) scaleX(-1); } }
 @keyframes introPixelCover { 0% { opacity: 0; transform: scale(.12); } 55% { opacity: 1; transform: scale(.86); } 100% { opacity: 1; transform: scale(1.08); } }
@@ -884,10 +897,14 @@ html[data-portfolio="tech"] .app-shell :is(button,a):focus-visible { outline-col
   .intro-title b { font-size: 6px; line-height: 1.7; }
   .intro-skip { top: 70px; }
   .intro-music { top: 70px; }
+  .intro-tech-lens { top: 70px; right: 14px; }
   .intro-ronia { left: 42%; bottom: 17%; height: clamp(142px,25svh,220px); }
   .intro-greeting { left: 42%; bottom: calc(17% + clamp(142px,25svh,220px) + 10px); width: min(260px,72vw); padding: 8px 10px; font-size: 11px; line-height: 1.35; }
-  .intro-cats { left: 1%; bottom: 18.7%; height: clamp(56px,8.8svh,78px); }
-  .intro-pet-scene { left: 6%; bottom: 17%; height: clamp(104px,16svh,150px); }
+  .intro-tech-bunny { left: 2%; bottom: 17%; height: clamp(94px,17svh,154px); }
+  .intro-bunny-label { left: 2%; bottom: calc(17% + clamp(94px,17svh,154px) + 4px); max-width: 134px; padding: 5px 6px; }
+  .intro-bunny-label strong { font-size: 5px; }
+  .intro-bunny-label span { font-size: 8px; }
+  .ronia-intro[data-session="game"] .intro-bunny-label { display: block; }
   .ronia-intro.game-playing .intro-ronia,
   .ronia-intro.game-playing[data-mode="run"] .intro-ronia,
   .ronia-intro.game-playing[data-mode="jump"] .intro-ronia { left: 42%; }
@@ -1039,6 +1056,15 @@ html[data-portfolio="tech"] .app-shell :is(button,a):focus-visible { outline-col
   .toast { bottom: 120px; }
 }
 
+@media (max-width: 360px) {
+  .intro-tech-bunny { height: clamp(82px,15svh,106px); }
+  .intro-bunny-label { bottom: calc(17% + clamp(82px,15svh,106px) + 4px); max-width: 104px; }
+  .intro-ronia,
+  .ronia-intro.game-playing .intro-ronia,
+  .ronia-intro.game-playing[data-mode="run"] .intro-ronia,
+  .ronia-intro.game-playing[data-mode="jump"] .intro-ronia { left: 45%; }
+}
+
 @media (max-height: 620px) and (orientation: landscape) {
   .intro-greeting { display: none; }
   .intro-prologue-actions { bottom: 8px; }
@@ -1057,8 +1083,8 @@ html[data-portfolio="tech"] .app-shell :is(button,a):focus-visible { outline-col
   .intro-title strong { font-size: clamp(38px,12vh,62px); }
   .intro-title b { margin-top: 9px; }
   .intro-ronia { bottom: 17%; height: clamp(110px,42svh,170px); }
-  .intro-cats { bottom: 19%; height: clamp(48px,15svh,68px); }
-  .intro-pet-scene { bottom: 17%; height: clamp(88px,31svh,125px); }
+  .intro-tech-bunny { bottom: 17%; height: clamp(68px,30svh,112px); }
+  .intro-bunny-label { bottom: calc(17% + clamp(68px,30svh,112px) + 2px); }
   .intro-enter { bottom: 8px; padding-block: 8px; }
 }
 
